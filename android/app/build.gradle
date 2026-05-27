@@ -20,7 +20,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.corsairlabs.bubble_blitz"
+        applicationId = "com.corsairlabs.bubbleblitz"
         minSdk = 21
         targetSdk = 34
         versionCode = flutter.versionCode

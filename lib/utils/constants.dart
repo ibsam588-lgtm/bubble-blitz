@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 
 class AppConstants {
@@ -41,17 +40,16 @@ class AppConstants {
 }
 
 class AdMobIds {
-  // TODO: replace with real AdMob IDs after setup
-  static String get bannerAdUnitId => Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111' // Google test banner
-      : 'ca-app-pub-3940256099942544/2934735716';
+  static const String appId = 'ca-app-pub-8127360916614638~9122968705';
 
-  static String get rewardedAdUnitId => Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/5224354917' // Google test rewarded
-      : 'ca-app-pub-3940256099942544/1712485313';
+  static String get bannerAdUnitId =>
+      'ca-app-pub-8127360916614638/7047165781';
 
-  static const String appId =
-      'ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX'; // TODO: replace
+  static String get rewardedAdUnitId =>
+      'ca-app-pub-8127360916614638/5016202735';
+
+  static String get interstitialAdUnitId =>
+      'ca-app-pub-8127360916614638/3870642029';
 }
 
 class IapIds {
