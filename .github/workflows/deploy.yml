@@ -1,0 +1,67 @@
+name: Deploy Bubble Blitz to Play Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store track (internal | alpha | beta | production)'
+        required: true
+        default: 'internal'
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+            echo "storeFile=upload-keystore.jks" >> android/key.properties
+            echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> android/key.properties
+            echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
+            echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
+          else
+            echo "No keystore configured; will build with debug keys"
+          fi
+
+      - name: Build app bundle
+        run: flutter build appbundle --release --no-pub
+
+      - name: Upload to Play Store
+        if: ${{ env.PLAY_STORE_KEY != '' }}
+        env:
+          PLAY_STORE_KEY: ${{ secrets.PLAY_STORE_JSON_KEY }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          packageName: com.corsairlabs.bubble_blitz
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: ${{ github.event.inputs.track || 'internal' }}
+          status: completed
+          inAppUpdatePriority: 2
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bubble-blitz-aab
+          path: build/app/outputs/bundle/release/app-release.aab
