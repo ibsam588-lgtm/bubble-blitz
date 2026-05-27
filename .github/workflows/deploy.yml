@@ -56,7 +56,7 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
           packageName: com.corsairlabs.bubble_blitz
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: ${{ github.event.inputs.track || 'internal' }}
+          tracks: ${{ github.event.inputs.track || 'internal' }}
           status: completed
           inAppUpdatePriority: 2
 
