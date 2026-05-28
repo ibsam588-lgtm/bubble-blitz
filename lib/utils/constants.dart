@@ -4,16 +4,24 @@ class AppConstants {
   static const String appName = 'Bubble Blitz';
   static const String appVersion = '1.0.0';
 
-  // World colors
-  static const Color world1Primary = Color(0xFFFFB6C1); // candy pink
-  static const Color world1Secondary = Color(0xFFFFF59D); // pastel yellow
-  static const Color world2Primary = Color(0xFF1B5E20); // dark green
-  static const Color world2Secondary = Color(0xFF0D47A1); // dark blue
-  static const Color world3Primary = Color(0xFFD32F2F); // red
-  static const Color world3Secondary = Color(0xFFFF6F00); // orange
+  // World colors — Bubble Bobble 2 style
+  static const Color world1Primary   = Color(0xFF2E7D32); // jungle dark green
+  static const Color world1Secondary = Color(0xFF66BB6A); // jungle light green
+  static const Color world2Primary   = Color(0xFF1A237E); // deep forest blue
+  static const Color world2Secondary = Color(0xFF388E3C); // forest green
+  static const Color world3Primary   = Color(0xFF7F0000); // volcano dark red
+  static const Color world3Secondary = Color(0xFFFF6F00); // volcano orange
+
+  // Platform colors per world
+  static const Color world1PlatformBase = Color(0xFF558B2F); // bamboo green
+  static const Color world1PlatformTop  = Color(0xFF76FF03); // grass cap
+  static const Color world2PlatformBase = Color(0xFF6D4C41); // wood brown
+  static const Color world2PlatformTop  = Color(0xFF4CAF50); // mossy green
+  static const Color world3PlatformBase = Color(0xFF455A64); // stone gray
+  static const Color world3PlatformGlow = Color(0xFFFF6F00); // lava glow
 
   // UI colors
-  static const Color bubbleBlue = Color(0xFF40C4FF);
+  static const Color bubbleBlue = Color(0xFF26C6DA); // cyan-teal
   static const Color bubbleOrange = Color(0xFFFF9800);
   static const Color bubblePurple = Color(0xFF9C27B0);
   static const Color accentYellow = Color(0xFFFFEB3B);

@@ -13,7 +13,7 @@ class Level {
   List<Component> build() {
     final out = <Component>[];
     for (final p in spec.platforms) {
-      out.add(GamePlatform(spec: p, color: spec.platformColor));
+      out.add(GamePlatform(spec: p, color: spec.platformColor, world: spec.world));
     }
     for (final e in spec.enemies) {
       switch (e.kind) {

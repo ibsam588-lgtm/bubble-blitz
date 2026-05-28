@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
@@ -27,34 +25,36 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
 
   Color get _bodyColor {
     switch (character) {
-      case CharacterType.dragon:
-        return AppConstants.bubbleBlue;
-      case CharacterType.phoenix:
-        return AppConstants.bubbleOrange;
-      case CharacterType.shadow:
-        return AppConstants.bubblePurple;
+      case CharacterType.dragon:  return const Color(0xFF4CAF50);
+      case CharacterType.phoenix: return const Color(0xFFFF5722);
+      case CharacterType.shadow:  return const Color(0xFF4527A0);
     }
   }
 
-  void moveLeft() {
-    vx = -AppConstants.playerSpeed;
-    facingRight = false;
+  Color get _bellyColor {
+    switch (character) {
+      case CharacterType.dragon:  return const Color(0xFF81C784);
+      case CharacterType.phoenix: return const Color(0xFFFFCC02);
+      case CharacterType.shadow:  return const Color(0xFF9575CD);
+    }
   }
 
-  void moveRight() {
-    vx = AppConstants.playerSpeed;
-    facingRight = true;
+  Color get _outlineColor {
+    switch (character) {
+      case CharacterType.dragon:  return const Color(0xFF1B5E20);
+      case CharacterType.phoenix: return const Color(0xFFBF360C);
+      case CharacterType.shadow:  return const Color(0xFF1A237E);
+    }
   }
 
-  void stopMoving() {
-    vx = 0;
-  }
+  // ── Physics ──────────────────────────────────────────────────────────────
+
+  void moveLeft()  { vx = -AppConstants.playerSpeed; facingRight = false; }
+  void moveRight() { vx =  AppConstants.playerSpeed; facingRight = true;  }
+  void stopMoving() { vx = 0; }
 
   void jump() {
-    if (onGround) {
-      vy = AppConstants.playerJumpVelocity;
-      onGround = false;
-    }
+    if (onGround) { vy = AppConstants.playerJumpVelocity; onGround = false; }
   }
 
   void shoot() {
@@ -80,26 +80,19 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
       if (invincibleTimer <= 0) invincible = false;
     }
 
-    // Apply gravity
     vy += AppConstants.gravity * dt;
     if (vy > 700) vy = 700;
 
-    // Move horizontally with collision
     position.x += vx * dt;
     _resolveHorizontal();
 
-    // Move vertically with collision
     position.y += vy * dt;
     onGround = false;
     _resolveVertical();
 
-    // Bounds
     if (position.x < 0) position.x = 0;
-    if (position.x + size.x > game.worldSize.x) {
-      position.x = game.worldSize.x - size.x;
-    }
+    if (position.x + size.x > game.worldSize.x) position.x = game.worldSize.x - size.x;
 
-    // Fall off bottom = damage
     if (position.y > game.worldSize.y + 40) {
       position = Vector2(60, game.worldSize.y - 120);
       vy = 0;
@@ -111,11 +104,8 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
     final myRect = Rect.fromLTWH(position.x, position.y, size.x, size.y);
     for (final p in game.platforms) {
       if (myRect.overlaps(p.rect)) {
-        if (vx > 0) {
-          position.x = p.rect.left - size.x;
-        } else if (vx < 0) {
-          position.x = p.rect.right;
-        }
+        if (vx > 0) position.x = p.rect.left - size.x;
+        else if (vx < 0) position.x = p.rect.right;
       }
     }
   }
@@ -124,58 +114,108 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
     final myRect = Rect.fromLTWH(position.x, position.y, size.x, size.y);
     for (final p in game.platforms) {
       if (myRect.overlaps(p.rect)) {
-        if (vy > 0) {
-          position.y = p.rect.top - size.y;
-          vy = 0;
-          onGround = true;
-        } else if (vy < 0) {
-          position.y = p.rect.bottom;
-          vy = 0;
-        }
+        if (vy > 0) { position.y = p.rect.top - size.y; vy = 0; onGround = true; }
+        else if (vy < 0) { position.y = p.rect.bottom; vy = 0; }
       }
     }
   }
 
+  // ── Rendering ─────────────────────────────────────────────────────────────
+
   @override
   void render(Canvas canvas) {
-    // Body
-    final bodyRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(10),
+    final cx = size.x / 2; // 18
+
+    // Wing nub (drawn behind body, on the back side)
+    final wingX = facingRight ? cx - 13.0 : cx + 13.0;
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(wingX, 17), width: 17, height: 12),
+      Paint()..color = _bodyColor,
     );
-    canvas.drawRRect(bodyRect, Paint()..color = _bodyColor);
-
-    // Belly accent
-    final bellyRect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(6, 18, size.x - 12, size.y - 22),
-      const Radius.circular(8),
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(wingX, 17), width: 17, height: 12),
+      Paint()
+        ..color = _outlineColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
     );
-    canvas.drawRRect(bellyRect, Paint()..color = Colors.white.withValues(alpha: 0.7));
 
-    // Eyes
-    final eyeY = 10.0;
-    final eyeOffsetL = facingRight ? 8.0 : 16.0;
-    final eyeOffsetR = facingRight ? 22.0 : 28.0;
-    canvas.drawCircle(Offset(eyeOffsetL, eyeY), 4, Paint()..color = Colors.white);
-    canvas.drawCircle(Offset(eyeOffsetR, eyeY), 4, Paint()..color = Colors.white);
-    final pupilDx = facingRight ? 1.5 : -1.5;
-    canvas.drawCircle(Offset(eyeOffsetL + pupilDx, eyeY), 2, Paint()..color = Colors.black);
-    canvas.drawCircle(Offset(eyeOffsetR + pupilDx, eyeY), 2, Paint()..color = Colors.black);
+    // Main chubby oval body
+    canvas.drawOval(
+      Rect.fromLTWH(2, 5, 32, 32),
+      Paint()..color = _bodyColor,
+    );
+    canvas.drawOval(
+      Rect.fromLTWH(2, 5, 32, 32),
+      Paint()
+        ..color = _outlineColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.8,
+    );
 
-    // Spikes on back
-    final spikePaint = Paint()..color = _bodyColor.withValues(alpha: 0.85);
-    for (int i = 0; i < 3; i++) {
-      final path = Path();
-      final cx = facingRight ? 4.0 + (i * 4) : size.x - 4 - (i * 4);
-      path.moveTo(cx, 4);
-      path.lineTo(cx - 3, 0);
-      path.lineTo(cx + 3, 0);
-      path.close();
-      canvas.drawPath(path, spikePaint);
+    // Lighter belly
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(cx, 25), width: 19, height: 21),
+      Paint()..color = _bellyColor,
+    );
+
+    // Horn on top of head (front side)
+    final hornCx = facingRight ? cx + 5.0 : cx - 5.0;
+    final hornPath = Path()
+      ..moveTo(hornCx - 4, 8)
+      ..lineTo(hornCx, 0)
+      ..lineTo(hornCx + 4, 8)
+      ..close();
+    canvas.drawPath(hornPath, Paint()..color = _outlineColor);
+    canvas.drawPath(
+      hornPath,
+      Paint()
+        ..color = _bellyColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+
+    // Large white eye sclera
+    final eyeX = facingRight ? cx + 7.0 : cx - 7.0;
+    canvas.drawCircle(Offset(eyeX, 15), 6.5, Paint()..color = Colors.white);
+    // Eye outline
+    canvas.drawCircle(
+      Offset(eyeX, 15),
+      6.5,
+      Paint()
+        ..color = _outlineColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
+    // Black pupil
+    final pupilX = facingRight ? eyeX + 2.0 : eyeX - 2.0;
+    canvas.drawCircle(Offset(pupilX, 15.5), 3.8, Paint()..color = Colors.black);
+    // Shine dot
+    canvas.drawCircle(Offset(eyeX + (facingRight ? -1.0 : 1.0), 11.5), 1.5,
+        Paint()..color = Colors.white);
+
+    // Stubby legs at bottom
+    final legPaint = Paint()..color = _outlineColor;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(cx - 14, 35, 12, 5), const Radius.circular(3)),
+      legPaint,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(cx + 2, 35, 12, 5), const Radius.circular(3)),
+      legPaint,
+    );
+
+    // Open mouth when shooting
+    if (shootCooldown > 0.1) {
+      final mouthX = facingRight ? eyeX + 9.0 : eyeX - 9.0;
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(mouthX, 21), width: 9, height: 6),
+        Paint()..color = const Color(0xFFE53935),
+      );
+      canvas.drawRect(
+        Rect.fromCenter(center: Offset(mouthX, 19.5), width: 7, height: 2),
+        Paint()..color = Colors.white,
+      );
     }
-  }
-
-  double _wobble(double dt) {
-    return math.sin(dt * 6) * 0.04;
   }
 }
