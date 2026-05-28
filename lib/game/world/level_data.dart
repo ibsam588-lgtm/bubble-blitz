@@ -75,15 +75,15 @@ class LevelData {
   static const double worldW = 480;
   static const double worldH = 800;
 
-  static List<LevelSpec> all() => [
-        // ===== World 1: Candy Kingdom =====
+  static List<LevelSpec> all() => const [
+        // ===== World 1: Waterfall Grove =====
         LevelSpec(
           level: 1,
           world: 1,
-          name: 'Candy Kingdom 1',
+          name: 'Waterfall Grove 1',
           bgPrimary: AppConstants.world1Primary,
           bgSecondary: AppConstants.world1Secondary,
-          platformColor: Color(0xFFFF80AB),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW), // ground
             PlatformSpec(x: 80, y: 600, width: 140),
@@ -110,10 +110,10 @@ class LevelData {
         LevelSpec(
           level: 2,
           world: 1,
-          name: 'Candy Kingdom 2',
+          name: 'Waterfall Grove 2',
           bgPrimary: AppConstants.world1Primary,
           bgSecondary: AppConstants.world1Secondary,
-          platformColor: Color(0xFFFF80AB),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 40, y: 640, width: 110),
@@ -129,9 +129,14 @@ class LevelData {
             EnemySpec(EnemyKind.slime, 220, 340),
           ],
           coins: [
-            CoinSpec(60, 600), CoinSpec(220, 540), CoinSpec(360, 460),
-            CoinSpec(220, 340), CoinSpec(80, 220), CoinSpec(360, 160),
-            CoinSpec(160, 600), CoinSpec(260, 540),
+            CoinSpec(60, 600),
+            CoinSpec(220, 540),
+            CoinSpec(360, 460),
+            CoinSpec(220, 340),
+            CoinSpec(80, 220),
+            CoinSpec(360, 160),
+            CoinSpec(160, 600),
+            CoinSpec(260, 540),
           ],
           powerups: [PowerupSpec('multi', 180, 340)],
           isBoss: false,
@@ -140,10 +145,10 @@ class LevelData {
         LevelSpec(
           level: 3,
           world: 1,
-          name: 'Candy Kingdom 3',
+          name: 'Waterfall Grove 3',
           bgPrimary: AppConstants.world1Primary,
           bgSecondary: AppConstants.world1Secondary,
-          platformColor: Color(0xFFE91E63),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 100, y: 640, width: 80, moving: true),
@@ -160,8 +165,12 @@ class LevelData {
             EnemySpec(EnemyKind.slime, 320, 160),
           ],
           coins: [
-            CoinSpec(120, 620), CoinSpec(280, 540), CoinSpec(80, 440),
-            CoinSpec(320, 360), CoinSpec(100, 260), CoinSpec(300, 160),
+            CoinSpec(120, 620),
+            CoinSpec(280, 540),
+            CoinSpec(80, 440),
+            CoinSpec(320, 360),
+            CoinSpec(100, 260),
+            CoinSpec(300, 160),
             CoinSpec(360, 160),
           ],
           powerups: [PowerupSpec('big', 60, 440)],
@@ -171,14 +180,15 @@ class LevelData {
         LevelSpec(
           level: 4,
           world: 1,
-          name: 'Candy Kingdom 4',
+          name: 'Waterfall Grove 4',
           bgPrimary: AppConstants.world1Primary,
           bgSecondary: AppConstants.world1Secondary,
-          platformColor: Color(0xFFAD1457),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 60, y: 640, width: 90),
-            PlatformSpec(x: 200, y: 580, width: 80, moving: true, moveRange: 100),
+            PlatformSpec(
+                x: 200, y: 580, width: 80, moving: true, moveRange: 100),
             PlatformSpec(x: 340, y: 500, width: 100),
             PlatformSpec(x: 60, y: 420, width: 100),
             PlatformSpec(x: 220, y: 340, width: 100),
@@ -193,9 +203,14 @@ class LevelData {
             EnemySpec(EnemyKind.slime, 100, 180),
           ],
           coins: [
-            CoinSpec(80, 600), CoinSpec(220, 560), CoinSpec(360, 480),
-            CoinSpec(80, 400), CoinSpec(240, 320), CoinSpec(380, 240),
-            CoinSpec(100, 180), CoinSpec(160, 180),
+            CoinSpec(80, 600),
+            CoinSpec(220, 560),
+            CoinSpec(360, 480),
+            CoinSpec(80, 400),
+            CoinSpec(240, 320),
+            CoinSpec(380, 240),
+            CoinSpec(100, 180),
+            CoinSpec(160, 180),
           ],
           powerups: [PowerupSpec('multi', 360, 240)],
           isBoss: false,
@@ -204,10 +219,10 @@ class LevelData {
         LevelSpec(
           level: 5,
           world: 1,
-          name: 'Candy King Boss',
-          bgPrimary: Color(0xFFAD1457),
-          bgSecondary: Color(0xFFFFB6C1),
-          platformColor: Color(0xFF880E4F),
+          name: 'Waterfall Beast Boss',
+          bgPrimary: Color(0xFF159F94),
+          bgSecondary: Color(0xFFFFE46B),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 40, y: 540, width: 120),
@@ -216,8 +231,10 @@ class LevelData {
           ],
           enemies: [EnemySpec(EnemyKind.boss, 220, 200)],
           coins: [
-            CoinSpec(60, 520), CoinSpec(120, 520),
-            CoinSpec(340, 520), CoinSpec(400, 520),
+            CoinSpec(60, 520),
+            CoinSpec(120, 520),
+            CoinSpec(340, 520),
+            CoinSpec(400, 520),
             CoinSpec(220, 360),
           ],
           powerups: [PowerupSpec('big', 220, 360)],
@@ -225,14 +242,14 @@ class LevelData {
           playerSpawn: Offset(60, 700),
         ),
 
-        // ===== World 2: Ghost Forest =====
+        // ===== World 2: Cloud Pines =====
         LevelSpec(
           level: 6,
           world: 2,
-          name: 'Ghost Forest 1',
+          name: 'Cloud Pines 1',
           bgPrimary: AppConstants.world2Primary,
           bgSecondary: AppConstants.world2Secondary,
-          platformColor: Color(0xFF1B5E20),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 80, y: 620, width: 130),
@@ -246,9 +263,12 @@ class LevelData {
             EnemySpec(EnemyKind.ghost, 220, 320),
           ],
           coins: [
-            CoinSpec(120, 600), CoinSpec(160, 600),
-            CoinSpec(320, 480), CoinSpec(120, 360),
-            CoinSpec(320, 240), CoinSpec(360, 240),
+            CoinSpec(120, 600),
+            CoinSpec(160, 600),
+            CoinSpec(320, 480),
+            CoinSpec(120, 360),
+            CoinSpec(320, 240),
+            CoinSpec(360, 240),
           ],
           powerups: [],
           isBoss: false,
@@ -257,10 +277,10 @@ class LevelData {
         LevelSpec(
           level: 7,
           world: 2,
-          name: 'Ghost Forest 2',
+          name: 'Cloud Pines 2',
           bgPrimary: AppConstants.world2Primary,
           bgSecondary: AppConstants.world2Secondary,
-          platformColor: Color(0xFF2E7D32),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 60, y: 620, width: 100),
@@ -277,8 +297,12 @@ class LevelData {
             EnemySpec(EnemyKind.slime, 340, 260),
           ],
           coins: [
-            CoinSpec(80, 600), CoinSpec(240, 540), CoinSpec(360, 440),
-            CoinSpec(140, 360), CoinSpec(320, 260), CoinSpec(80, 160),
+            CoinSpec(80, 600),
+            CoinSpec(240, 540),
+            CoinSpec(360, 440),
+            CoinSpec(140, 360),
+            CoinSpec(320, 260),
+            CoinSpec(80, 160),
             CoinSpec(140, 160),
           ],
           powerups: [PowerupSpec('multi', 360, 440)],
@@ -288,10 +312,10 @@ class LevelData {
         LevelSpec(
           level: 8,
           world: 2,
-          name: 'Ghost Forest 3',
+          name: 'Cloud Pines 3',
           bgPrimary: AppConstants.world2Primary,
           bgSecondary: AppConstants.world2Secondary,
-          platformColor: Color(0xFF388E3C),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 80, y: 640, width: 90),
@@ -310,9 +334,14 @@ class LevelData {
             EnemySpec(EnemyKind.slime, 360, 200),
           ],
           coins: [
-            CoinSpec(100, 620), CoinSpec(260, 560), CoinSpec(80, 440),
-            CoinSpec(300, 380), CoinSpec(140, 280), CoinSpec(340, 200),
-            CoinSpec(60, 120), CoinSpec(120, 120),
+            CoinSpec(100, 620),
+            CoinSpec(260, 560),
+            CoinSpec(80, 440),
+            CoinSpec(300, 380),
+            CoinSpec(140, 280),
+            CoinSpec(340, 200),
+            CoinSpec(60, 120),
+            CoinSpec(120, 120),
           ],
           powerups: [PowerupSpec('big', 320, 200)],
           isBoss: false,
@@ -321,13 +350,14 @@ class LevelData {
         LevelSpec(
           level: 9,
           world: 2,
-          name: 'Ghost Forest 4',
+          name: 'Cloud Pines 4',
           bgPrimary: AppConstants.world2Primary,
           bgSecondary: AppConstants.world2Secondary,
-          platformColor: Color(0xFF1B5E20),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
-            PlatformSpec(x: 100, y: 640, width: 80, moving: true, moveRange: 120),
+            PlatformSpec(
+                x: 100, y: 640, width: 80, moving: true, moveRange: 120),
             PlatformSpec(x: 280, y: 560, width: 100),
             PlatformSpec(x: 80, y: 460, width: 100),
             PlatformSpec(x: 240, y: 360, width: 100, moving: true),
@@ -342,8 +372,12 @@ class LevelData {
             EnemySpec(EnemyKind.fireImp, 340, 140),
           ],
           coins: [
-            CoinSpec(120, 620), CoinSpec(300, 540), CoinSpec(100, 440),
-            CoinSpec(260, 340), CoinSpec(100, 240), CoinSpec(320, 140),
+            CoinSpec(120, 620),
+            CoinSpec(300, 540),
+            CoinSpec(100, 440),
+            CoinSpec(260, 340),
+            CoinSpec(100, 240),
+            CoinSpec(320, 140),
             CoinSpec(380, 140),
           ],
           powerups: [PowerupSpec('multi', 80, 240)],
@@ -353,10 +387,10 @@ class LevelData {
         LevelSpec(
           level: 10,
           world: 2,
-          name: 'Forest Phantom Boss',
-          bgPrimary: Color(0xFF0D3D14),
-          bgSecondary: Color(0xFF1B5E20),
-          platformColor: Color(0xFF004D40),
+          name: 'Cloud Jar Boss',
+          bgPrimary: Color(0xFF332E92),
+          bgSecondary: Color(0xFF27C2D2),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 60, y: 520, width: 120),
@@ -365,8 +399,10 @@ class LevelData {
           ],
           enemies: [EnemySpec(EnemyKind.boss, 220, 200)],
           coins: [
-            CoinSpec(80, 500), CoinSpec(140, 500),
-            CoinSpec(320, 500), CoinSpec(380, 500),
+            CoinSpec(80, 500),
+            CoinSpec(140, 500),
+            CoinSpec(320, 500),
+            CoinSpec(380, 500),
             CoinSpec(220, 340),
           ],
           powerups: [PowerupSpec('big', 220, 340)],
@@ -374,14 +410,14 @@ class LevelData {
           playerSpawn: Offset(60, 700),
         ),
 
-        // ===== World 3: Fire Volcano =====
+        // ===== World 3: Dragon Canopy =====
         LevelSpec(
           level: 11,
           world: 3,
-          name: 'Fire Volcano 1',
+          name: 'Dragon Canopy 1',
           bgPrimary: AppConstants.world3Primary,
           bgSecondary: AppConstants.world3Secondary,
-          platformColor: Color(0xFFBF360C),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 80, y: 620, width: 120),
@@ -395,8 +431,11 @@ class LevelData {
             EnemySpec(EnemyKind.fireImp, 320, 240),
           ],
           coins: [
-            CoinSpec(120, 600), CoinSpec(320, 480), CoinSpec(120, 360),
-            CoinSpec(320, 240), CoinSpec(360, 240),
+            CoinSpec(120, 600),
+            CoinSpec(320, 480),
+            CoinSpec(120, 360),
+            CoinSpec(320, 240),
+            CoinSpec(360, 240),
           ],
           powerups: [],
           isBoss: false,
@@ -405,10 +444,10 @@ class LevelData {
         LevelSpec(
           level: 12,
           world: 3,
-          name: 'Fire Volcano 2',
+          name: 'Dragon Canopy 2',
           bgPrimary: AppConstants.world3Primary,
           bgSecondary: AppConstants.world3Secondary,
-          platformColor: Color(0xFFD84315),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 60, y: 640, width: 90, moving: true),
@@ -426,8 +465,12 @@ class LevelData {
             EnemySpec(EnemyKind.ghost, 120, 140),
           ],
           coins: [
-            CoinSpec(80, 620), CoinSpec(240, 540), CoinSpec(360, 440),
-            CoinSpec(120, 360), CoinSpec(320, 240), CoinSpec(100, 140),
+            CoinSpec(80, 620),
+            CoinSpec(240, 540),
+            CoinSpec(360, 440),
+            CoinSpec(120, 360),
+            CoinSpec(320, 240),
+            CoinSpec(100, 140),
             CoinSpec(160, 140),
           ],
           powerups: [PowerupSpec('multi', 320, 240)],
@@ -437,13 +480,14 @@ class LevelData {
         LevelSpec(
           level: 13,
           world: 3,
-          name: 'Fire Volcano 3',
+          name: 'Dragon Canopy 3',
           bgPrimary: AppConstants.world3Primary,
           bgSecondary: AppConstants.world3Secondary,
-          platformColor: Color(0xFFBF360C),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
-            PlatformSpec(x: 80, y: 640, width: 80, moving: true, moveRange: 140),
+            PlatformSpec(
+                x: 80, y: 640, width: 80, moving: true, moveRange: 140),
             PlatformSpec(x: 240, y: 580, width: 100),
             PlatformSpec(x: 80, y: 460, width: 110),
             PlatformSpec(x: 280, y: 380, width: 110, moving: true),
@@ -459,9 +503,14 @@ class LevelData {
             EnemySpec(EnemyKind.ghost, 360, 160),
           ],
           coins: [
-            CoinSpec(100, 620), CoinSpec(280, 560), CoinSpec(120, 440),
-            CoinSpec(320, 360), CoinSpec(160, 260), CoinSpec(360, 160),
-            CoinSpec(60, 80), CoinSpec(140, 80),
+            CoinSpec(100, 620),
+            CoinSpec(280, 560),
+            CoinSpec(120, 440),
+            CoinSpec(320, 360),
+            CoinSpec(160, 260),
+            CoinSpec(360, 160),
+            CoinSpec(60, 80),
+            CoinSpec(140, 80),
           ],
           powerups: [PowerupSpec('big', 80, 440)],
           isBoss: false,
@@ -470,10 +519,10 @@ class LevelData {
         LevelSpec(
           level: 14,
           world: 3,
-          name: 'Fire Volcano 4',
+          name: 'Dragon Canopy 4',
           bgPrimary: AppConstants.world3Primary,
           bgSecondary: AppConstants.world3Secondary,
-          platformColor: Color(0xFFE65100),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 100, y: 640, width: 80, moving: true),
@@ -493,21 +542,30 @@ class LevelData {
             EnemySpec(EnemyKind.ghost, 320, 160),
           ],
           coins: [
-            CoinSpec(120, 620), CoinSpec(320, 540), CoinSpec(80, 440),
-            CoinSpec(280, 340), CoinSpec(80, 240), CoinSpec(300, 160),
-            CoinSpec(360, 160), CoinSpec(100, 80), CoinSpec(160, 80),
+            CoinSpec(120, 620),
+            CoinSpec(320, 540),
+            CoinSpec(80, 440),
+            CoinSpec(280, 340),
+            CoinSpec(80, 240),
+            CoinSpec(300, 160),
+            CoinSpec(360, 160),
+            CoinSpec(100, 80),
+            CoinSpec(160, 80),
           ],
-          powerups: [PowerupSpec('multi', 60, 240), PowerupSpec('big', 280, 160)],
+          powerups: [
+            PowerupSpec('multi', 60, 240),
+            PowerupSpec('big', 280, 160)
+          ],
           isBoss: false,
           playerSpawn: Offset(60, 700),
         ),
         LevelSpec(
           level: 15,
           world: 3,
-          name: 'Volcano Dragon Boss',
-          bgPrimary: Color(0xFF7F0000),
-          bgSecondary: Color(0xFFFF6F00),
-          platformColor: Color(0xFF3E2723),
+          name: 'Crimson Dragon Boss',
+          bgPrimary: Color(0xFFB53C45),
+          bgSecondary: Color(0xFFFFC145),
+          platformColor: AppConstants.bark,
           platforms: [
             PlatformSpec(x: 0, y: 760, width: worldW),
             PlatformSpec(x: 40, y: 500, width: 130),
@@ -516,8 +574,10 @@ class LevelData {
           ],
           enemies: [EnemySpec(EnemyKind.boss, 220, 180)],
           coins: [
-            CoinSpec(60, 480), CoinSpec(120, 480),
-            CoinSpec(330, 480), CoinSpec(390, 480),
+            CoinSpec(60, 480),
+            CoinSpec(120, 480),
+            CoinSpec(330, 480),
+            CoinSpec(390, 480),
             CoinSpec(220, 320),
           ],
           powerups: [

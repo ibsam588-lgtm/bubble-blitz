@@ -19,6 +19,10 @@ class IapService {
   bool get available => _available;
 
   Future<void> init() async {
+    if (kIsWeb) {
+      _available = false;
+      return;
+    }
     try {
       _available = await _iap.isAvailable();
       if (!_available) return;

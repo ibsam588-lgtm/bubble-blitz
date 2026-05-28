@@ -1,6 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/constants.dart';
 import '../bubble_blitz_game.dart';
 import 'platform.dart';
 import 'player.dart';
@@ -66,17 +67,106 @@ abstract class Enemy extends PositionComponent
 
   @override
   void render(Canvas canvas) {
-    // Body
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(8),
-    );
-    canvas.drawRRect(rrect, Paint()..color = color);
+    if (emoji == 'G') {
+      _renderGhost(canvas);
+    } else if (emoji == 'F') {
+      _renderFireImp(canvas);
+    } else {
+      _renderSlime(canvas);
+    }
+  }
 
-    // Emoji-as-face
-    final tp = TextPaint(
-      style: const TextStyle(fontSize: 20, color: Colors.white),
+  void _renderSlime(Canvas canvas) {
+    final shadow = Paint()..color = Colors.black.withValues(alpha: 0.18);
+    canvas.drawOval(Rect.fromLTWH(2, size.y - 3, size.x - 4, 5), shadow);
+
+    canvas.drawOval(
+      Rect.fromLTWH(4, 8, size.x - 8, size.y - 8),
+      Paint()..color = AppConstants.heroGreen,
     );
-    tp.render(canvas, emoji, Vector2(size.x / 2 - 10, size.y / 2 - 12));
+    canvas.drawOval(
+      Rect.fromLTWH(size.x * 0.12, 4, size.x * 0.46, size.y * 0.54),
+      Paint()..color = const Color(0xFFFFE16A),
+    );
+    for (final x in [7.0, size.x - 10]) {
+      canvas.drawOval(
+        Rect.fromLTWH(x, size.y - 8, 7, 5),
+        Paint()..color = AppConstants.barkDark,
+      );
+    }
+    for (final x in [size.x * 0.18, size.x * 0.48, size.x * 0.76]) {
+      canvas.drawCircle(
+        Offset(x, size.y * 0.68),
+        2.1,
+        Paint()..color = AppConstants.vine.withValues(alpha: 0.85),
+      );
+    }
+
+    _drawEyes(
+      canvas,
+      size.x * 0.28,
+      size.x * 0.48,
+      size.y * 0.34,
+      pupilColor: Colors.red.shade900,
+    );
+    canvas.drawArc(
+      Rect.fromLTWH(size.x * 0.28, size.y * 0.47, size.x * 0.2, 5),
+      0,
+      3.14,
+      false,
+      Paint()
+        ..color = const Color(0xFF10212B)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+  }
+
+  void _renderGhost(Canvas canvas) {
+    canvas.drawOval(
+      Rect.fromLTWH(4, 6, size.x - 8, size.y - 8),
+      Paint()..color = AppConstants.foamWhite.withValues(alpha: 0.95),
+    );
+    canvas.drawOval(
+      Rect.fromLTWH(size.x * 0.2, size.y * 0.12, size.x * 0.6, size.y * 0.24),
+      Paint()..color = AppConstants.accentYellow.withValues(alpha: 0.52),
+    );
+    for (final x in [size.x * 0.28, size.x * 0.5, size.x * 0.72]) {
+      canvas.drawCircle(
+        Offset(x, size.y * 0.78),
+        3.0,
+        Paint()..color = AppConstants.uiDark.withValues(alpha: 0.28),
+      );
+    }
+    _drawEyes(canvas, size.x * 0.38, size.x * 0.62, size.y * 0.44);
+  }
+
+  void _renderFireImp(Canvas canvas) {
+    final flame = Path()
+      ..moveTo(size.x * 0.5, 1)
+      ..quadraticBezierTo(size.x * 0.95, size.y * 0.34, size.x * 0.78, size.y)
+      ..quadraticBezierTo(size.x * 0.5, size.y * 0.85, size.x * 0.2, size.y)
+      ..quadraticBezierTo(size.x * 0.03, size.y * 0.35, size.x * 0.5, 1)
+      ..close();
+    canvas.drawPath(flame, Paint()..color = AppConstants.fireRed);
+    canvas.drawOval(
+      Rect.fromLTWH(size.x * 0.3, size.y * 0.34, size.x * 0.4, size.y * 0.45),
+      Paint()..color = AppConstants.accentYellow,
+    );
+    _drawEyes(canvas, size.x * 0.38, size.x * 0.62, size.y * 0.48);
+  }
+
+  void _drawEyes(
+    Canvas canvas,
+    double leftX,
+    double rightX,
+    double y, {
+    Color pupilColor = const Color(0xFF10212B),
+  }) {
+    final white = Paint()..color = Colors.white;
+    final ink = Paint()..color = pupilColor;
+    canvas.drawCircle(Offset(leftX, y), 4, white);
+    canvas.drawCircle(Offset(rightX, y), 4, white);
+    canvas.drawCircle(Offset(leftX + 0.7, y + 0.4), 2, ink);
+    canvas.drawCircle(Offset(rightX + 0.7, y + 0.4), 2, ink);
   }
 }

@@ -23,16 +23,17 @@ class LevelCompleteScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final stars = manager.starsEarned();
     return Container(
-      color: Colors.black87,
+      color: AppConstants.uiDark.withValues(alpha: 0.9),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'LEVEL COMPLETE!',
+              'WORLD CLEARED!',
               style: GoogleFonts.fredoka(
                 color: AppConstants.accentYellow,
                 fontSize: 36,
+                fontWeight: FontWeight.w800,
               ),
             ).animate().scale(duration: 400.ms, curve: Curves.elasticOut),
             const SizedBox(height: 12),
@@ -46,9 +47,7 @@ class LevelCompleteScreen extends StatelessWidget {
                       Icons.star,
                       color: i <= stars ? Colors.amber : Colors.white24,
                       size: 56,
-                    )
-                        .animate()
-                        .scale(
+                    ).animate().scale(
                           duration: 300.ms,
                           delay: (200 * i).ms,
                           curve: Curves.elasticOut,
@@ -59,25 +58,33 @@ class LevelCompleteScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               'Score: ${manager.score}',
-              style: GoogleFonts.fredoka(color: Colors.white, fontSize: 22),
+              style: GoogleFonts.fredoka(
+                color: AppConstants.foamWhite,
+                fontSize: 22,
+              ),
             ),
             Text(
-              'Coins: ${manager.coinsCollected} 🪙',
-              style: GoogleFonts.fredoka(color: AppConstants.accentYellow, fontSize: 18),
+              'Bits: ${manager.coinsCollected}',
+              style: GoogleFonts.fredoka(
+                color: AppConstants.accentYellow,
+                fontSize: 18,
+              ),
             ),
             const SizedBox(height: 28),
             SizedBox(
               width: 240,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.bubbleBlue,
+                  backgroundColor: AppConstants.heroGreen,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () => onNext(),
-                icon: const Icon(Icons.arrow_forward),
-                label: Text('NEXT LEVEL', style: GoogleFonts.fredoka(fontSize: 18)),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: Text('NEXT LEVEL',
+                    style: GoogleFonts.fredoka(fontSize: 18)),
               ),
             ),
             const SizedBox(height: 10),
@@ -88,10 +95,11 @@ class LevelCompleteScreen extends StatelessWidget {
                   backgroundColor: AppConstants.bubbleOrange,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: () => onRetry(),
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh_rounded),
                 label: Text('RETRY', style: GoogleFonts.fredoka(fontSize: 18)),
               ),
             ),
@@ -103,11 +111,13 @@ class LevelCompleteScreen extends StatelessWidget {
                   backgroundColor: Colors.white24,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                 ),
                 onPressed: onExit,
-                icon: const Icon(Icons.home),
-                label: Text('MAIN MENU', style: GoogleFonts.fredoka(fontSize: 18)),
+                icon: const Icon(Icons.home_rounded),
+                label:
+                    Text('MAIN MENU', style: GoogleFonts.fredoka(fontSize: 18)),
               ),
             ),
           ],

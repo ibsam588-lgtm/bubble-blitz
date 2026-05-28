@@ -1,11 +1,11 @@
 {
-    "name": "bubble_blitz",
-    "short_name": "bubble_blitz",
+    "name": "Bubble Blitz",
+    "short_name": "Blitz",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#10212B",
+    "theme_color": "#48D579",
+    "description": "Retro arcade bubble-platform adventure with dino avatars, bubble bits, and boss worlds.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

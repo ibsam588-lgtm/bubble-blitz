@@ -14,12 +14,12 @@ class LoadingScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(color: AppConstants.bubbleBlue),
+            const CircularProgressIndicator(color: AppConstants.heroGreen),
             const SizedBox(height: 20),
             Text(
-              'Loading...',
+              'Loading hero bubbles...',
               style: GoogleFonts.fredoka(
-                color: Colors.white,
+                color: AppConstants.foamWhite,
                 fontSize: 18,
               ),
             ),

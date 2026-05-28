@@ -23,10 +23,13 @@ class _StoreScreenState extends State<StoreScreen> {
     return Scaffold(
       backgroundColor: AppConstants.uiDark,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text('Store', style: GoogleFonts.fredoka(color: Colors.white)),
+        backgroundColor: AppConstants.uiDark,
+        title: Text(
+          'Avatar Shop',
+          style: GoogleFonts.fredoka(color: AppConstants.foamWhite),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppConstants.foamWhite),
           onPressed: () => context.go('/menu'),
         ),
         actions: [
@@ -34,26 +37,41 @@ class _StoreScreenState extends State<StoreScreen> {
             padding: const EdgeInsets.only(right: 12),
             child: Center(
               child: Text(
-                '${SaveService.instance.data.coins} 🪙',
+                '${SaveService.instance.data.coins} bits',
                 style: GoogleFonts.fredoka(
                   color: AppConstants.accentYellow,
                   fontSize: 18,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(12),
-        children: [
-          _section('Coin Packs', items.where((i) => i.type == StoreItemType.iapCoins)),
-          _section('Remove Ads', items.where((i) => i.type == StoreItemType.iapNoAds)),
-          _section('Characters', items.where((i) => i.type == StoreItemType.character)),
-          _section('Power-ups', items.where((i) => i.type == StoreItemType.powerup)),
-          _section('Extra Lives', items.where((i) => i.type == StoreItemType.life)),
-          const SizedBox(height: 24),
-        ],
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppConstants.uiDark, AppConstants.uiPanel],
+          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(12),
+          children: [
+            _section('Bubble Bits',
+                items.where((i) => i.type == StoreItemType.iapCoins)),
+            _section('Arcade Pass',
+                items.where((i) => i.type == StoreItemType.iapNoAds)),
+            _section('Dino Avatars',
+                items.where((i) => i.type == StoreItemType.character)),
+            _section('Power Bubbles',
+                items.where((i) => i.type == StoreItemType.powerup)),
+            _section('Extra Lives',
+                items.where((i) => i.type == StoreItemType.life)),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -66,7 +84,11 @@ class _StoreScreenState extends State<StoreScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
           child: Text(
             title,
-            style: GoogleFonts.fredoka(color: Colors.white, fontSize: 20),
+            style: GoogleFonts.fredoka(
+              color: AppConstants.foamWhite,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         for (final item in items) _itemCard(item),
@@ -82,11 +104,30 @@ class _StoreScreenState extends State<StoreScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppConstants.uiCard,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
-          Text(item.emoji, style: const TextStyle(fontSize: 36)),
+          Container(
+            width: 46,
+            height: 46,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppConstants.bubbleBlue.withValues(alpha: 0.18),
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: AppConstants.foamWhite.withValues(alpha: 0.4)),
+            ),
+            child: Text(
+              item.emoji,
+              style: GoogleFonts.fredoka(
+                color: AppConstants.foamWhite,
+                fontSize: item.emoji.length > 2 ? 14 : 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -94,7 +135,11 @@ class _StoreScreenState extends State<StoreScreen> {
               children: [
                 Text(
                   item.name,
-                  style: GoogleFonts.fredoka(color: Colors.white, fontSize: 17),
+                  style: GoogleFonts.fredoka(
+                    color: AppConstants.foamWhite,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 Text(
                   item.description,
@@ -109,7 +154,7 @@ class _StoreScreenState extends State<StoreScreen> {
               backgroundColor: AppConstants.bubbleBlue,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
             child: Text(
@@ -127,9 +172,11 @@ class _StoreScreenState extends State<StoreScreen> {
       final ok = await IapService.instance.buy(item.iapProductId!);
       if (!ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Purchase unavailable. Try again later.')),
+          const SnackBar(
+              content: Text('Purchase unavailable. Try again later.')),
         );
       }
+      if (!mounted) return;
       setState(() {});
       return;
     }
@@ -139,10 +186,13 @@ class _StoreScreenState extends State<StoreScreen> {
     switch (result) {
       case StorePurchaseResult.success:
         if (item.id == 'char_phoenix') {
-          await SaveService.instance.setSelectedCharacter(CharacterType.phoenix.id);
+          await SaveService.instance
+              .setSelectedCharacter(CharacterType.phoenix.id);
         } else if (item.id == 'char_shadow') {
-          await SaveService.instance.setSelectedCharacter(CharacterType.shadow.id);
+          await SaveService.instance
+              .setSelectedCharacter(CharacterType.shadow.id);
         }
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Purchased ${item.name}!')),
         );

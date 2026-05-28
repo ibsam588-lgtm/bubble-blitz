@@ -100,9 +100,8 @@ class SaveService {
     final current = _data.levelStars[level] ?? 0;
     if (stars > current) {
       _data.levelStars[level] = stars;
-      final list = _data.levelStars.entries
-          .map((e) => '${e.key}:${e.value}')
-          .toList();
+      final list =
+          _data.levelStars.entries.map((e) => '${e.key}:${e.value}').toList();
       await _prefs?.setStringList(SaveKeys.levelStars, list);
     }
   }

@@ -4,11 +4,11 @@ extension CharacterTypeX on CharacterType {
   String get displayName {
     switch (this) {
       case CharacterType.dragon:
-        return 'Dragon';
+        return 'Green Dino';
       case CharacterType.phoenix:
-        return 'Phoenix';
+        return 'Red Dino';
       case CharacterType.shadow:
-        return 'Shadow Dragon';
+        return 'Blue Dino';
     }
   }
 
@@ -26,11 +26,11 @@ extension CharacterTypeX on CharacterType {
   String get emoji {
     switch (this) {
       case CharacterType.dragon:
-        return '🐲';
+        return 'G';
       case CharacterType.phoenix:
-        return '🔥';
+        return 'R';
       case CharacterType.shadow:
-        return '🦇';
+        return 'B';
     }
   }
 }

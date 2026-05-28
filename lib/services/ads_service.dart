@@ -15,6 +15,10 @@ class AdsService {
 
   Future<void> init() async {
     if (_initialized) return;
+    if (kIsWeb) {
+      _initialized = true;
+      return;
+    }
     try {
       await MobileAds.instance.initialize();
       _initialized = true;
@@ -27,7 +31,7 @@ class AdsService {
   bool get adsRemoved => SaveService.instance.adsRemoved;
 
   BannerAd? createBannerAd() {
-    if (adsRemoved) return null;
+    if (kIsWeb || adsRemoved) return null;
     try {
       final ad = BannerAd(
         adUnitId: AdMobIds.bannerAdUnitId,
@@ -49,6 +53,7 @@ class AdsService {
   }
 
   void loadRewardedAd() {
+    if (kIsWeb) return;
     if (adsRemoved) return;
     if (_loadingRewarded || _rewardedAd != null) return;
     _loadingRewarded = true;
@@ -75,6 +80,7 @@ class AdsService {
   }
 
   Future<bool> showRewardedAd() async {
+    if (kIsWeb) return false;
     if (adsRemoved) return false;
     final ad = _rewardedAd;
     if (ad == null) {

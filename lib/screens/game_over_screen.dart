@@ -25,30 +25,35 @@ class GameOverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final coins = SaveService.instance.data.coins;
     return Container(
-      color: Colors.black87,
+      color: AppConstants.uiDark.withValues(alpha: 0.92),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'GAME OVER',
+              'TRY AGAIN',
               style: GoogleFonts.fredoka(
-                color: Colors.red,
-                fontSize: 56,
+                color: AppConstants.bubbleOrange,
+                fontSize: 52,
+                fontWeight: FontWeight.w800,
                 shadows: const [
-                  Shadow(blurRadius: 8, color: Colors.black, offset: Offset(2, 2)),
+                  Shadow(
+                      blurRadius: 8, color: Colors.black, offset: Offset(2, 2)),
                 ],
               ),
             ),
             const SizedBox(height: 16),
             Text(
               'Score: ${manager.score}',
-              style: GoogleFonts.fredoka(color: Colors.white, fontSize: 24),
+              style: GoogleFonts.fredoka(
+                color: AppConstants.foamWhite,
+                fontSize: 24,
+              ),
             ),
             const SizedBox(height: 32),
             _btn(
               icon: Icons.play_circle,
-              color: AppConstants.bubbleOrange,
+              color: AppConstants.heroGreen,
               label: 'Watch Ad to Continue',
               onTap: onContinueWithAd,
             ),
@@ -57,7 +62,8 @@ class GameOverScreen extends StatelessWidget {
               icon: Icons.monetization_on,
               color: AppConstants.accentYellow,
               textColor: Colors.black,
-              label: 'Use ${AppConstants.continueCost} 🪙 to Continue ($coins)',
+              label:
+                  'Use ${AppConstants.continueCost} bits to Continue ($coins)',
               onTap: onContinueWithCoins,
             ),
             const SizedBox(height: 12),
@@ -94,7 +100,7 @@ class GameOverScreen extends StatelessWidget {
           backgroundColor: color,
           foregroundColor: textColor,
           padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
         onPressed: () => onTap(),
         icon: Icon(icon),

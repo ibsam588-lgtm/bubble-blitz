@@ -1,55 +1,90 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/constants.dart';
 import '../bubble_blitz_game.dart';
 
-class GameHud extends PositionComponent
-    with HasGameReference<BubbleBlitzGame> {
+class GameHud extends PositionComponent with HasGameReference<BubbleBlitzGame> {
   GameHud() : super(priority: 100);
 
   @override
   void render(Canvas canvas) {
-    final w = game.worldSize.x;
+    final w = game.viewSize.x;
     // Top bar background
-    final bg = Paint()..color = Colors.black.withValues(alpha: 0.35);
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, 44), bg);
+    final barRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(8, 8, w - 16, 48),
+      const Radius.circular(6),
+    );
+    canvas.drawRRect(
+      barRect,
+      Paint()..color = AppConstants.uiDark.withValues(alpha: 0.86),
+    );
+    canvas.drawRRect(
+      barRect,
+      Paint()
+        ..color = AppConstants.accentYellow.withValues(alpha: 0.74)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
 
     final mgr = game.manager;
 
     // Score (left)
-    final scoreTp = TextPaint(
+    final labelTp = TextPaint(
       style: const TextStyle(
-        fontSize: 16,
+        fontSize: 11,
+        color: AppConstants.accentYellow,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    final valueTp = TextPaint(
+      style: const TextStyle(
+        fontSize: 15,
         color: Colors.white,
         fontWeight: FontWeight.bold,
       ),
     );
-    scoreTp.render(canvas, 'SCORE  ${mgr.score}', Vector2(12, 14));
+    labelTp.render(canvas, '1P-SCORE', Vector2(22, 16));
+    valueTp.render(canvas, '${mgr.score}', Vector2(23, 32));
 
-    // Lives (center) using hearts
-    final heart = TextPaint(
-      style: const TextStyle(fontSize: 18, color: Colors.white),
+    // Lives (center)
+    labelTp.render(canvas, 'HI-SCORE', Vector2(w / 2 - 38, 16));
+    valueTp.render(canvas, '${mgr.score}', Vector2(w / 2 - 24, 32));
+
+    final lifeTp = TextPaint(
+      style: const TextStyle(
+        fontSize: 15,
+        color: AppConstants.heroGreen,
+        fontWeight: FontWeight.bold,
+      ),
     );
-    final livesStr = '❤' * mgr.lives.clamp(0, 9);
-    heart.render(canvas, livesStr, Vector2(w / 2 - 30, 12));
+    lifeTp.render(
+      canvas,
+      'LIFE ${mgr.lives.clamp(0, 9)}',
+      Vector2(w - 174, 18),
+    );
 
     // Coins (right)
     final coinTp = TextPaint(
       style: const TextStyle(
-        fontSize: 16,
-        color: Color(0xFFFFEB3B),
+        fontSize: 15,
+        color: AppConstants.accentYellow,
         fontWeight: FontWeight.bold,
       ),
     );
-    coinTp.render(canvas, '🪙 ${mgr.coinsCollected}', Vector2(w - 92, 14));
+    coinTp.render(
+      canvas,
+      'BITS ${mgr.coinsCollected}',
+      Vector2(w - 96, 18),
+    );
 
     // Power-up indicators
     if (mgr.bigBubbleActive || mgr.multiBubbleShots > 0) {
-      final y = 50.0;
+      const y = 58.0;
       final tp = TextPaint(
         style: const TextStyle(
           fontSize: 12,
-          color: Colors.white,
+          color: AppConstants.foamWhite,
           fontWeight: FontWeight.bold,
         ),
       );
@@ -58,14 +93,9 @@ class GameHud extends PositionComponent
         parts.add('BIG ${mgr.bigBubbleTimer.toStringAsFixed(1)}s');
       }
       if (mgr.multiBubbleShots > 0) {
-        parts.add('×3 ${mgr.multiBubbleShots}');
+        parts.add('x3 ${mgr.multiBubbleShots}');
       }
       tp.render(canvas, parts.join('   '), Vector2(12, y));
     }
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
   }
 }

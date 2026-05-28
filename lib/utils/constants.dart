@@ -2,23 +2,32 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
   static const String appName = 'Bubble Blitz';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '1.0.0+1';
 
   // World colors
-  static const Color world1Primary = Color(0xFFFFB6C1); // candy pink
-  static const Color world1Secondary = Color(0xFFFFF59D); // pastel yellow
-  static const Color world2Primary = Color(0xFF1B5E20); // dark green
-  static const Color world2Secondary = Color(0xFF0D47A1); // dark blue
-  static const Color world3Primary = Color(0xFFD32F2F); // red
-  static const Color world3Secondary = Color(0xFFFF6F00); // orange
+  static const Color world1Primary = Color(0xFF5FA448); // waterfall moss
+  static const Color world1Secondary = Color(0xFFC8ECFF); // waterfall mist
+  static const Color world2Primary = Color(0xFF5EAF38); // forest grass
+  static const Color world2Secondary = Color(0xFF6EC8FF); // mountain sky
+  static const Color world3Primary = Color(0xFF6B4A31); // bark arena
+  static const Color world3Secondary = Color(0xFF22496A); // dusk canopy
 
   // UI colors
-  static const Color bubbleBlue = Color(0xFF40C4FF);
-  static const Color bubbleOrange = Color(0xFFFF9800);
-  static const Color bubblePurple = Color(0xFF9C27B0);
-  static const Color accentYellow = Color(0xFFFFEB3B);
-  static const Color uiDark = Color(0xFF1A1A2E);
-  static const Color uiCard = Color(0xFF16213E);
+  static const Color bubbleBlue = Color(0xFF3FCBFF);
+  static const Color bubbleOrange = Color(0xFFE84A30);
+  static const Color bubblePurple = Color(0xFF7246B6);
+  static const Color heroGreen = Color(0xFF48C64A);
+  static const Color accentYellow = Color(0xFFFFD54A);
+  static const Color foamWhite = Color(0xFFFFFFFF);
+  static const Color uiDark = Color(0xFF102033);
+  static const Color uiCard = Color(0xFF173B4F);
+  static const Color uiPanel = Color(0xFF245C56);
+  static const Color bark = Color(0xFFB88B46);
+  static const Color barkDark = Color(0xFF5E3A22);
+  static const Color moss = Color(0xFF2FB85D);
+  static const Color vine = Color(0xFF287D36);
+  static const Color waterfall = Color(0xFFDDF8FF);
+  static const Color fireRed = Color(0xFFE64222);
 
   // Game tuning
   static const double playerSpeed = 180.0;
@@ -42,8 +51,7 @@ class AppConstants {
 class AdMobIds {
   static const String appId = 'ca-app-pub-8127360916614638~9122968705';
 
-  static String get bannerAdUnitId =>
-      'ca-app-pub-8127360916614638/7047165781';
+  static String get bannerAdUnitId => 'ca-app-pub-8127360916614638/7047165781';
 
   static String get rewardedAdUnitId =>
       'ca-app-pub-8127360916614638/5016202735';

@@ -17,65 +17,87 @@ class LevelSelectScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppConstants.uiDark,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text('Levels', style: GoogleFonts.fredoka(color: Colors.white)),
+        backgroundColor: AppConstants.uiDark,
+        title: Text(
+          'Arcade Stages',
+          style: GoogleFonts.fredoka(color: AppConstants.foamWhite),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppConstants.foamWhite),
           onPressed: () => context.go('/menu'),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          for (final world in [1, 2, 3]) ...[
-            _worldHeader(world),
-            const SizedBox(height: 12),
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 5,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              children: levels.where((l) => l.world == world).map((l) {
-                final isUnlocked = l.level <= unlocked;
-                final s = stars[l.level] ?? 0;
-                return _LevelTile(
-                  spec: l,
-                  unlocked: isUnlocked,
-                  stars: s,
-                  onTap: isUnlocked
-                      ? () => context.go('/game/${l.level}')
-                      : null,
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 24),
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppConstants.uiDark, AppConstants.uiPanel],
+          ),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            for (final world in [1, 2, 3]) ...[
+              _worldHeader(world),
+              const SizedBox(height: 12),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 5,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                children: levels.where((l) => l.world == world).map((l) {
+                  final isUnlocked = l.level <= unlocked;
+                  final s = stars[l.level] ?? 0;
+                  return _LevelTile(
+                    spec: l,
+                    unlocked: isUnlocked,
+                    stars: s,
+                    onTap: isUnlocked
+                        ? () => context.go('/game/${l.level}')
+                        : null,
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 24),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
   Widget _worldHeader(int world) {
-    final name = ['Candy Kingdom', 'Ghost Forest', 'Fire Volcano'][world - 1];
+    final name = ['Waterfall Grove', 'Cloud Pines', 'Dragon Canopy'][world - 1];
     final color = [
       AppConstants.world1Primary,
       AppConstants.world2Primary,
       AppConstants.world3Primary,
     ][world - 1];
+    final icon = [
+      Icons.cloud_queue_rounded,
+      Icons.forest_rounded,
+      Icons.water_drop_rounded,
+    ][world - 1];
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(14),
+        color: color.withValues(alpha: 0.86),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: Row(
         children: [
-          Text(['🍭', '👻', '🌋'][world - 1], style: const TextStyle(fontSize: 24)),
+          Icon(icon, color: AppConstants.foamWhite, size: 24),
           const SizedBox(width: 12),
           Text(
             'World $world: $name',
-            style: GoogleFonts.fredoka(color: Colors.white, fontSize: 18),
+            style: GoogleFonts.fredoka(
+              color: AppConstants.foamWhite,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -99,14 +121,22 @@ class _LevelTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
         decoration: BoxDecoration(
-          color: unlocked ? spec.bgPrimary : Colors.grey.shade800,
-          borderRadius: BorderRadius.circular(12),
+          color: unlocked ? spec.bgPrimary : AppConstants.uiCard,
+          borderRadius: BorderRadius.circular(8),
           border: spec.isBoss
-              ? Border.all(color: Colors.amber, width: 2)
-              : null,
+              ? Border.all(color: AppConstants.accentYellow, width: 2)
+              : Border.all(color: Colors.white.withValues(alpha: 0.14)),
+          boxShadow: [
+            if (unlocked)
+              BoxShadow(
+                color: spec.bgPrimary.withValues(alpha: 0.28),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -115,10 +145,11 @@ class _LevelTile extends StatelessWidget {
               const Icon(Icons.lock, color: Colors.white70, size: 20)
             else
               Text(
-                spec.isBoss ? '👑' : '${spec.level}',
+                spec.isBoss ? 'B' : '${spec.level}',
                 style: GoogleFonts.fredoka(
-                  color: Colors.white,
+                  color: AppConstants.foamWhite,
                   fontSize: spec.isBoss ? 22 : 18,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             const SizedBox(height: 2),

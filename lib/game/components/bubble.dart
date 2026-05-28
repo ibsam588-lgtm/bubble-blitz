@@ -115,22 +115,41 @@ class Bubble extends PositionComponent with HasGameReference<BubbleBlitzGame> {
   void render(Canvas canvas) {
     final center = Offset(radius, radius);
 
-    final outerPaint = Paint()
-      ..color = AppConstants.bubbleBlue.withValues(alpha: 0.55)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius, outerPaint);
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()..color = AppConstants.bubbleBlue.withValues(alpha: 0.36),
+    );
+    canvas.drawCircle(
+      center,
+      radius * 0.78,
+      Paint()..color = AppConstants.foamWhite.withValues(alpha: 0.12),
+    );
 
     final ringPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.8)
+      ..color = Colors.white.withValues(alpha: 0.85)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     canvas.drawCircle(center, radius - 1, ringPaint);
+    canvas.drawCircle(
+      center,
+      radius * 0.58,
+      Paint()
+        ..color = AppConstants.heroGreen.withValues(alpha: 0.35)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.1,
+    );
 
     final highlight = Paint()..color = Colors.white.withValues(alpha: 0.7);
     canvas.drawCircle(
       Offset(radius - radius * 0.4, radius - radius * 0.4),
       radius * 0.25,
       highlight,
+    );
+    canvas.drawCircle(
+      Offset(radius + radius * 0.3, radius + radius * 0.2),
+      radius * 0.1,
+      Paint()..color = AppConstants.accentYellow.withValues(alpha: 0.45),
     );
 
     if (trappedEnemy != null) {

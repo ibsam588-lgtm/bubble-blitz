@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/constants.dart';
 import '../bubble_blitz_game.dart';
 import 'enemy.dart';
 
@@ -15,8 +16,8 @@ class SlimeEnemy extends Enemy {
           position: position,
           size: Vector2(34, 28),
           health: 1,
-          emoji: '🟢',
-          color: const Color(0xFF66BB6A),
+          emoji: 'S',
+          color: AppConstants.heroGreen,
           scoreValue: 100,
         );
 
@@ -68,8 +69,8 @@ class GhostEnemy extends Enemy {
           position: position,
           size: Vector2(34, 34),
           health: 2,
-          emoji: '👻',
-          color: const Color(0xFFE0E0E0),
+          emoji: 'G',
+          color: const Color(0xFFFFC928),
           scoreValue: 200,
         );
 
@@ -94,8 +95,8 @@ class FireImpEnemy extends Enemy {
           position: position,
           size: Vector2(32, 32),
           health: 1,
-          emoji: '🔥',
-          color: const Color(0xFFEF5350),
+          emoji: 'F',
+          color: const Color(0xFFFFD734),
           scoreValue: 250,
         );
 
@@ -103,9 +104,14 @@ class FireImpEnemy extends Enemy {
   void update(double dt) {
     super.update(dt);
     if (isTrapped) return;
-    final player = game.player;
-    if (player != null) {
-      final dx = player.position.x - position.x;
+    final targets = game.activePlayers.toList();
+    if (targets.isNotEmpty) {
+      targets.sort(
+        (a, b) => (a.position - position).length.compareTo(
+              (b.position - position).length,
+            ),
+      );
+      final dx = targets.first.position.x - position.x;
       position.x += dx.sign * 25 * dt;
     }
 
@@ -135,8 +141,8 @@ class BossEnemy extends Enemy {
           position: position,
           size: Vector2(80, 70),
           health: 10,
-          emoji: '👹',
-          color: const Color(0xFF8E24AA),
+          emoji: 'B',
+          color: AppConstants.accentYellow,
           scoreValue: 2000,
         );
 
@@ -165,55 +171,118 @@ class BossEnemy extends Enemy {
 
   @override
   void render(Canvas canvas) {
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      const Radius.circular(14),
+    canvas.drawOval(
+      Rect.fromLTWH(6, size.y - 5, size.x - 12, 9),
+      Paint()..color = Colors.black.withValues(alpha: 0.22),
     );
-    canvas.drawRRect(rrect, Paint()..color = color);
 
-    // Horns
-    final hornPaint = Paint()..color = Colors.red.shade900;
-    final left = Path()
-      ..moveTo(10, 0)
-      ..lineTo(20, -10)
-      ..lineTo(28, 0)
+    final red = Paint()..color = const Color(0xFFD82822);
+    final redDark = Paint()..color = const Color(0xFF8C1F22);
+    final white = Paint()..color = const Color(0xFFFFF2DE);
+    final ink = Paint()..color = AppConstants.uiDark;
+
+    final tail = Path()
+      ..moveTo(9, 38)
+      ..quadraticBezierTo(-10, 18, 18, 17)
+      ..quadraticBezierTo(28, 28, 18, 42)
       ..close();
-    final right = Path()
-      ..moveTo(size.x - 28, 0)
-      ..lineTo(size.x - 20, -10)
-      ..lineTo(size.x - 10, 0)
+    canvas.drawPath(tail, red);
+    canvas.drawOval(const Rect.fromLTWH(0, 15, 18, 18), white);
+
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        const Rect.fromLTWH(16, 24, 43, 31),
+        const Radius.circular(17),
+      ),
+      red,
+    );
+    final stripe = Paint()
+      ..color = AppConstants.foamWhite.withValues(alpha: 0.9)
+      ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round;
+    for (final points in [
+      [const Offset(24, 28), const Offset(34, 39)],
+      [const Offset(39, 26), const Offset(48, 38)],
+      [const Offset(51, 30), const Offset(57, 43)],
+    ]) {
+      canvas.drawLine(points[0], points[1], stripe);
+    }
+
+    for (final leg in [
+      const Rect.fromLTWH(23, 48, 8, 17),
+      const Rect.fromLTWH(45, 48, 8, 17),
+    ]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(leg, const Radius.circular(5)),
+        redDark,
+      );
+      canvas.drawOval(
+        Rect.fromLTWH(leg.left - 2, leg.bottom - 5, 13, 6),
+        white,
+      );
+    }
+
+    canvas.drawOval(const Rect.fromLTWH(48, 9, 31, 28), red);
+    final earLeft = Path()
+      ..moveTo(54, 12)
+      ..lineTo(57, -4)
+      ..lineTo(66, 12)
       ..close();
-    canvas.drawPath(left, hornPaint);
-    canvas.drawPath(right, hornPaint);
+    final earRight = Path()
+      ..moveTo(68, 12)
+      ..lineTo(80, -1)
+      ..lineTo(78, 17)
+      ..close();
+    canvas.drawPath(earLeft, red);
+    canvas.drawPath(earRight, red);
+    canvas.drawPath(
+      earLeft,
+      Paint()
+        ..color = white.color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
+    canvas.drawPath(
+      earRight,
+      Paint()
+        ..color = white.color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2,
+    );
 
-    // Eyes
-    final eyePaint = Paint()..color = Colors.yellow;
-    canvas.drawCircle(Offset(size.x * 0.3, size.y * 0.4), 6, eyePaint);
-    canvas.drawCircle(Offset(size.x * 0.7, size.y * 0.4), 6, eyePaint);
-    canvas.drawCircle(Offset(size.x * 0.3, size.y * 0.4), 3, Paint()..color = Colors.black);
-    canvas.drawCircle(Offset(size.x * 0.7, size.y * 0.4), 3, Paint()..color = Colors.black);
+    canvas.drawOval(const Rect.fromLTWH(54, 20, 26, 18), white);
+    canvas.drawCircle(const Offset(59, 20), 5.2, white);
+    canvas.drawCircle(const Offset(72, 20), 5.2, white);
+    canvas.drawCircle(const Offset(60.5, 20), 2.3, ink);
+    canvas.drawCircle(const Offset(73.5, 20), 2.3, ink);
+    canvas.drawOval(const Rect.fromLTWH(75, 27, 5, 4), ink);
+    canvas.drawArc(
+      const Rect.fromLTWH(64, 29, 13, 7),
+      0,
+      3.14,
+      false,
+      Paint()
+        ..color = ink.color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
 
-    // Mouth
-    final mouthPaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
-    final mouthPath = Path()
-      ..moveTo(size.x * 0.25, size.y * 0.7)
-      ..quadraticBezierTo(size.x * 0.5, size.y * 0.85, size.x * 0.75, size.y * 0.7);
-    canvas.drawPath(mouthPath, mouthPaint);
-
-    // Health bar
-    final maxHp = 10;
+    const maxHp = 10;
     final hpW = size.x;
     final hpFrac = (health / maxHp).clamp(0.0, 1.0);
-    canvas.drawRect(
-      Rect.fromLTWH(0, -22, hpW, 6),
-      Paint()..color = Colors.black54,
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, -22, hpW, 7),
+        const Radius.circular(4),
+      ),
+      Paint()..color = Colors.black.withValues(alpha: 0.45),
     );
-    canvas.drawRect(
-      Rect.fromLTWH(0, -22, hpW * hpFrac, 6),
-      Paint()..color = Colors.greenAccent.shade400,
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, -22, hpW * hpFrac, 7),
+        const Radius.circular(4),
+      ),
+      Paint()..color = AppConstants.heroGreen,
     );
   }
 }
@@ -244,8 +313,7 @@ class EnemyProjectile extends PositionComponent
       removeFromParent();
       return;
     }
-    final player = game.player;
-    if (player != null) {
+    for (final player in game.activePlayers) {
       final rect = Rect.fromLTWH(
         position.x - size.x / 2,
         position.y - size.y / 2,
@@ -267,15 +335,18 @@ class EnemyProjectile extends PositionComponent
 
   @override
   void render(Canvas canvas) {
+    final center = Offset(size.x / 2, size.y / 2);
     canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
+      center,
       size.x / 2,
-      Paint()..color = Colors.orange,
+      Paint()..color = AppConstants.bubbleOrange.withValues(alpha: 0.85),
     );
     canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
-      size.x / 4,
-      Paint()..color = Colors.yellow,
+        center, size.x / 3, Paint()..color = AppConstants.accentYellow);
+    canvas.drawCircle(
+      Offset(center.dx - 2, center.dy - 2),
+      size.x / 7,
+      Paint()..color = Colors.white.withValues(alpha: 0.7),
     );
   }
 }

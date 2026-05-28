@@ -20,67 +20,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: AppConstants.uiDark,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text('Settings', style: GoogleFonts.fredoka(color: Colors.white)),
+        backgroundColor: AppConstants.uiDark,
+        title: Text(
+          'Options',
+          style: GoogleFonts.fredoka(color: AppConstants.foamWhite),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppConstants.foamWhite),
           onPressed: () => context.go('/menu'),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _toggleTile(
-            'Music',
-            Icons.music_note,
-            save.musicEnabled,
-            (v) async {
-              await save.setMusicEnabled(v);
-              await AudioService.instance.refreshFromSettings();
-              setState(() {});
-            },
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppConstants.uiDark, AppConstants.uiPanel],
           ),
-          _toggleTile(
-            'Sound Effects',
-            Icons.volume_up,
-            save.sfxEnabled,
-            (v) async {
-              await save.setSfxEnabled(v);
-              setState(() {});
-            },
-          ),
-          _toggleTile(
-            'Vibration',
-            Icons.vibration,
-            save.vibrationEnabled,
-            (v) async {
-              await save.setVibrationEnabled(v);
-              setState(() {});
-            },
-          ),
-          const Divider(color: Colors.white24, height: 32),
-          ListTile(
-            leading: const Icon(Icons.info, color: Colors.white),
-            title: Text('Version',
-                style: GoogleFonts.fredoka(color: Colors.white)),
-            trailing: Text(
-              AppConstants.appVersion,
-              style: const TextStyle(color: Colors.white70),
+        ),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            _toggleTile(
+              'Music',
+              Icons.music_note,
+              save.musicEnabled,
+              (v) async {
+                await save.setMusicEnabled(v);
+                await AudioService.instance.refreshFromSettings();
+                setState(() {});
+              },
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.restore, color: Colors.white),
-            title: Text(
-              'Restore Purchases',
-              style: GoogleFonts.fredoka(color: Colors.white),
+            _toggleTile(
+              'Sound Effects',
+              Icons.volume_up,
+              save.sfxEnabled,
+              (v) async {
+                await save.setSfxEnabled(v);
+                setState(() {});
+              },
             ),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Purchases restored')),
-              );
-            },
-          ),
-        ],
+            _toggleTile(
+              'Vibration',
+              Icons.vibration,
+              save.vibrationEnabled,
+              (v) async {
+                await save.setVibrationEnabled(v);
+                setState(() {});
+              },
+            ),
+            const Divider(color: Colors.white24, height: 32),
+            ListTile(
+              leading: const Icon(Icons.info, color: AppConstants.foamWhite),
+              title: Text(
+                'Version',
+                style: GoogleFonts.fredoka(color: AppConstants.foamWhite),
+              ),
+              trailing: const Text(
+                AppConstants.appVersion,
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.restore, color: AppConstants.foamWhite),
+              title: Text(
+                'Restore Purchases',
+                style: GoogleFonts.fredoka(color: AppConstants.foamWhite),
+              ),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Purchases restored')),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -91,13 +105,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.symmetric(vertical: 6),
       decoration: BoxDecoration(
         color: AppConstants.uiCard,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: SwitchListTile(
-        title: Text(label, style: GoogleFonts.fredoka(color: Colors.white)),
-        secondary: Icon(icon, color: Colors.white),
+        title: Text(label,
+            style: GoogleFonts.fredoka(color: AppConstants.foamWhite)),
+        secondary: Icon(icon, color: AppConstants.foamWhite),
         value: value,
-        activeColor: AppConstants.bubbleBlue,
+        activeColor: AppConstants.heroGreen,
         onChanged: onChanged,
       ),
     );

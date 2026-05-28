@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
+import '../../utils/constants.dart';
 import '../bubble_blitz_game.dart';
 
 class Powerup extends PositionComponent with HasGameReference<BubbleBlitzGame> {
@@ -12,15 +13,15 @@ class Powerup extends PositionComponent with HasGameReference<BubbleBlitzGame> {
   bool collected = false;
 
   Powerup({required Vector2 position, required this.kind})
-      : super(position: position, size: Vector2(26, 26), anchor: Anchor.topLeft) {
+      : super(
+            position: position, size: Vector2(26, 26), anchor: Anchor.topLeft) {
     startY = position.y;
   }
 
-  Color get color => kind == 'multi'
-      ? Colors.pinkAccent
-      : Colors.cyanAccent.shade400;
+  Color get color =>
+      kind == 'multi' ? AppConstants.bubblePurple : AppConstants.bubbleBlue;
 
-  String get glyph => kind == 'multi' ? '×3' : 'B';
+  String get glyph => kind == 'multi' ? 'x3' : 'B';
 
   @override
   void update(double dt) {
@@ -28,19 +29,21 @@ class Powerup extends PositionComponent with HasGameReference<BubbleBlitzGame> {
     t += dt;
     position.y = startY + math.sin(t * 3) * 4;
 
-    final player = game.player;
-    if (player != null && !collected) {
+    if (!collected) {
       final rect = Rect.fromLTWH(position.x, position.y, size.x, size.y);
-      final pr = Rect.fromLTWH(
-        player.position.x,
-        player.position.y,
-        player.size.x,
-        player.size.y,
-      );
-      if (rect.overlaps(pr)) {
-        collected = true;
-        game.onPowerupCollected(this);
-        removeFromParent();
+      for (final player in game.activePlayers) {
+        final pr = Rect.fromLTWH(
+          player.position.x,
+          player.position.y,
+          player.size.x,
+          player.size.y,
+        );
+        if (rect.overlaps(pr)) {
+          collected = true;
+          game.onPowerupCollected(this);
+          removeFromParent();
+          return;
+        }
       }
     }
   }
@@ -48,11 +51,20 @@ class Powerup extends PositionComponent with HasGameReference<BubbleBlitzGame> {
   @override
   void render(Canvas canvas) {
     final c = Offset(size.x / 2, size.y / 2);
-    canvas.drawCircle(c, size.x / 2, Paint()..color = color);
+    canvas.drawCircle(
+      c,
+      size.x / 2,
+      Paint()..color = color.withValues(alpha: 0.9),
+    );
     canvas.drawCircle(
       c,
       size.x / 2 - 2,
-      Paint()..color = Colors.white.withValues(alpha: 0.4),
+      Paint()..color = AppConstants.foamWhite.withValues(alpha: 0.28),
+    );
+    canvas.drawCircle(
+      Offset(c.dx - 4, c.dy - 4),
+      4,
+      Paint()..color = Colors.white.withValues(alpha: 0.65),
     );
     final tp = TextPaint(
       style: const TextStyle(

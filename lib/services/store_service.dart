@@ -11,9 +11,9 @@ class StoreService {
   static const List<StoreItem> _staticItems = [
     StoreItem(
       id: IapIds.coinpackStarter,
-      name: 'Starter Coin Pack',
-      description: '2,500 coins',
-      emoji: '🪙',
+      name: 'Starter Bubble Bits',
+      description: '2,500 bubble bits',
+      emoji: 'B',
       type: StoreItemType.iapCoins,
       coinAmount: 2500,
       iapProductId: IapIds.coinpackStarter,
@@ -21,9 +21,9 @@ class StoreService {
     ),
     StoreItem(
       id: IapIds.coinpackValue,
-      name: 'Value Coin Pack',
-      description: '7,000 coins',
-      emoji: '💰',
+      name: 'Hero Bubble Vault',
+      description: '7,000 bubble bits',
+      emoji: 'H',
       type: StoreItemType.iapCoins,
       coinAmount: 7000,
       iapProductId: IapIds.coinpackValue,
@@ -31,9 +31,9 @@ class StoreService {
     ),
     StoreItem(
       id: IapIds.coinpackMega,
-      name: 'Mega Coin Pack',
-      description: '15,000 coins',
-      emoji: '💎',
+      name: 'Mega Bubble Cache',
+      description: '15,000 bubble bits',
+      emoji: 'M',
       type: StoreItemType.iapCoins,
       coinAmount: 15000,
       iapProductId: IapIds.coinpackMega,
@@ -43,32 +43,32 @@ class StoreService {
       id: IapIds.removeAds,
       name: 'Remove Ads',
       description: 'No more ads, ever.',
-      emoji: '🚫',
+      emoji: 'AD',
       type: StoreItemType.iapNoAds,
       iapProductId: IapIds.removeAds,
       priceLabel: '\$1.99',
     ),
     StoreItem(
       id: 'char_phoenix',
-      name: 'Phoenix',
-      description: 'Fiery orange character',
-      emoji: '🔥',
+      name: 'Red Dino',
+      description: 'A red arcade dino with white speed markings.',
+      emoji: 'F',
       type: StoreItemType.character,
       coinCost: AppConstants.characterPhoenixCost,
     ),
     StoreItem(
       id: 'char_shadow',
-      name: 'Shadow Dragon',
-      description: 'Mysterious purple dragon',
-      emoji: '🦇',
+      name: 'Blue Dino',
+      description: 'A blue arcade dino for high-jump stages.',
+      emoji: 'N',
       type: StoreItemType.character,
       coinCost: AppConstants.characterShadowCost,
     ),
     StoreItem(
       id: 'pack_shield',
-      name: 'Shield Pack',
+      name: 'Bubble Shield Pack',
       description: '5 shields',
-      emoji: '🛡️',
+      emoji: 'SH',
       type: StoreItemType.powerup,
       coinCost: AppConstants.shieldPackCost,
     ),
@@ -76,7 +76,7 @@ class StoreService {
       id: 'pack_speed',
       name: 'Speed Boost Pack',
       description: '5 speed boosts',
-      emoji: '⚡',
+      emoji: 'SP',
       type: StoreItemType.powerup,
       coinCost: AppConstants.speedPackCost,
     ),
@@ -84,7 +84,7 @@ class StoreService {
       id: 'pack_multibubble',
       name: 'Multi-Bubble Pack',
       description: '5 multi-bubble shots',
-      emoji: '🫧',
+      emoji: 'x3',
       type: StoreItemType.powerup,
       coinCost: AppConstants.multiBubblePackCost,
     ),
@@ -92,7 +92,7 @@ class StoreService {
       id: 'life_1',
       name: 'Extra Life',
       description: '+1 life',
-      emoji: '❤️',
+      emoji: '+1',
       type: StoreItemType.life,
       coinCost: AppConstants.extraLife1Cost,
     ),
@@ -100,7 +100,7 @@ class StoreService {
       id: 'life_5',
       name: '5 Lives Pack',
       description: '+5 lives',
-      emoji: '💖',
+      emoji: '+5',
       type: StoreItemType.life,
       coinCost: AppConstants.extraLife5Cost,
     ),
@@ -112,9 +112,9 @@ class StoreService {
     if (item.iapProductId != null) {
       final product = IapService.instance.findProduct(item.iapProductId!);
       if (product != null) return product.price;
-      return item.priceLabel ?? '—';
+      return item.priceLabel ?? '-';
     }
-    return '${item.coinCost} 🪙';
+    return '${item.coinCost} bits';
   }
 
   bool isOwned(StoreItem item) {

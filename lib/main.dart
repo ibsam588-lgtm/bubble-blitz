@@ -61,7 +61,7 @@ class BubbleBlitzApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: AppConstants.bubbleBlue,
+          seedColor: AppConstants.heroGreen,
           brightness: Brightness.dark,
         ),
         scaffoldBackgroundColor: AppConstants.uiDark,

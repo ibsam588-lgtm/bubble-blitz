@@ -120,7 +120,7 @@ class _GameScreenState extends State<GameScreen> {
               child: _actionButtons(),
             ),
             Positioned(
-              top: 8,
+              top: 54,
               right: 8,
               child: IconButton(
                 icon: Icon(_paused ? Icons.play_arrow : Icons.pause,
@@ -181,13 +181,13 @@ class _GameScreenState extends State<GameScreen> {
     return Row(
       children: [
         _ctrlButton(
-          label: 'JUMP',
+          icon: Icons.keyboard_arrow_up_rounded,
           color: AppConstants.bubbleOrange,
           onPressDown: () => game.touchJump = true,
         ),
         const SizedBox(width: 10),
         _ctrlButton(
-          label: 'FIRE',
+          icon: Icons.bubble_chart_rounded,
           color: AppConstants.bubbleBlue,
           onPressDown: () => game.touchShoot = true,
         ),
@@ -210,16 +210,28 @@ class _GameScreenState extends State<GameScreen> {
         width: 64,
         height: 64,
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.55),
+          color: color.withValues(alpha: 0.68),
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white54, width: 2),
+          border: Border.all(
+              color: AppConstants.foamWhite.withValues(alpha: 0.72), width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.22),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         alignment: Alignment.center,
         child: icon != null
-            ? Icon(icon, color: Colors.white, size: 32)
+            ? Icon(icon, color: AppConstants.foamWhite, size: 34)
             : Text(
                 label ?? '',
-                style: GoogleFonts.fredoka(color: Colors.white, fontSize: 14),
+                style: GoogleFonts.fredoka(
+                  color: AppConstants.foamWhite,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
       ),
     );
@@ -227,21 +239,37 @@ class _GameScreenState extends State<GameScreen> {
 
   Widget _pauseOverlay() {
     return Container(
-      color: Colors.black54,
+      color: AppConstants.uiDark.withValues(alpha: 0.82),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'PAUSED',
-              style: GoogleFonts.fredoka(color: Colors.white, fontSize: 48),
+              style: GoogleFonts.fredoka(
+                color: AppConstants.foamWhite,
+                fontSize: 48,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(onPressed: _togglePause, child: const Text('RESUME')),
+            ElevatedButton.icon(
+              onPressed: _togglePause,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: const Text('RESUME'),
+            ),
             const SizedBox(height: 8),
-            ElevatedButton(onPressed: _restart, child: const Text('RESTART')),
+            ElevatedButton.icon(
+              onPressed: _restart,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('RESTART'),
+            ),
             const SizedBox(height: 8),
-            ElevatedButton(onPressed: _exit, child: const Text('QUIT')),
+            ElevatedButton.icon(
+              onPressed: _exit,
+              icon: const Icon(Icons.home_rounded),
+              label: const Text('QUIT'),
+            ),
           ],
         ),
       ),

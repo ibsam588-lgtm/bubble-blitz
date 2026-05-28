@@ -1,4 +1,6 @@
 import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/foundation.dart';
+
 import '../utils/assets.dart';
 import 'save_service.dart';
 
@@ -9,25 +11,36 @@ class AudioService {
 
   bool _initialized = false;
   bool _bgmPlaying = false;
+  bool _assetsAvailable = false;
+
+  static const List<String> _audioFiles = [
+    Assets.flameBgm,
+    Assets.flameBubbleShoot,
+    Assets.flameBubblePop,
+    Assets.flameCoinCollect,
+    Assets.flamePlayerHit,
+    Assets.flameLevelComplete,
+    Assets.flameGameOver,
+  ];
 
   Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
+    if (kIsWeb) {
+      _assetsAvailable = true;
+      return;
+    }
     try {
-      await FlameAudio.audioCache.loadAll([
-        Assets.flameBubbleShoot,
-        Assets.flameBubblePop,
-        Assets.flameCoinCollect,
-        Assets.flamePlayerHit,
-        Assets.flameLevelComplete,
-        Assets.flameGameOver,
-      ]);
-    } catch (_) {
-      // Graceful no-op if assets missing
+      await FlameAudio.audioCache.loadAll(_audioFiles);
+      _assetsAvailable = true;
+    } catch (e) {
+      _assetsAvailable = false;
+      if (kDebugMode) debugPrint('Audio preload failed: $e');
     }
   }
 
   Future<void> playBgm() async {
+    if (!_assetsAvailable) return;
     if (!SaveService.instance.musicEnabled) return;
     if (_bgmPlaying) return;
     try {
@@ -46,6 +59,7 @@ class AudioService {
   }
 
   Future<void> playSfx(String name) async {
+    if (!_assetsAvailable) return;
     if (!SaveService.instance.sfxEnabled) return;
     try {
       await FlameAudio.play(name, volume: 0.7);
