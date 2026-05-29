@@ -110,8 +110,21 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
     final p = player;
     if (p == null) return;
 
-    if (touchMove < 0)      p.moveLeft();
-    else if (touchMove > 0) p.moveRight();
+    // Movement: touch has priority; fall back to held keyboard keys;
+    // always call stopMoving() when no input so vx doesn't persist.
+    if (touchMove < 0) {
+      p.moveLeft();
+    } else if (touchMove > 0) {
+      p.moveRight();
+    } else {
+      final kLeft  = _pressed.contains(LogicalKeyboardKey.arrowLeft)  ||
+                     _pressed.contains(LogicalKeyboardKey.keyA);
+      final kRight = _pressed.contains(LogicalKeyboardKey.arrowRight) ||
+                     _pressed.contains(LogicalKeyboardKey.keyD);
+      if (kLeft && !kRight)       p.moveLeft();
+      else if (kRight && !kLeft)  p.moveRight();
+      else                        p.stopMoving(); // no input → stop sliding
+    }
 
     if (touchJump)  { p.jump();  touchJump  = false; }
     if (touchShoot) { p.shoot(); touchShoot = false; }
@@ -235,21 +248,13 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
 
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // Keep the held-key set up to date — movement is handled in update()
+    // so it fires correctly every frame (not just on key events).
     _pressed..clear()..addAll(keysPressed);
     final p = player;
     if (p == null) return KeyEventResult.ignored;
 
-    final left = _pressed.contains(LogicalKeyboardKey.arrowLeft) ||
-        _pressed.contains(LogicalKeyboardKey.keyA);
-    final right = _pressed.contains(LogicalKeyboardKey.arrowRight) ||
-        _pressed.contains(LogicalKeyboardKey.keyD);
-
-    if (touchMove == 0) {
-      if (left && !right)       p.moveLeft();
-      else if (right && !left)  p.moveRight();
-      else                      p.stopMoving();
-    }
-
+    // One-shot actions: jump and shoot trigger on key-down only.
     if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.space ||
           event.logicalKey == LogicalKeyboardKey.arrowUp ||

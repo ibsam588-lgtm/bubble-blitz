@@ -202,10 +202,14 @@ class _GameScreenState extends State<GameScreen> {
     VoidCallback? onPressDown,
     VoidCallback? onPressUp,
   }) {
-    return GestureDetector(
-      onTapDown: (_) => onPressDown?.call(),
-      onTapUp: (_) => onPressUp?.call(),
-      onTapCancel: () => onPressUp?.call(),
+    // Use Listener (raw pointer events) instead of GestureDetector so these
+    // buttons are never stolen by the GameWidget's gesture arena. onPointerDown
+    // fires the instant a finger touches the button — no tap-recognition delay.
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: (_) => onPressDown?.call(),
+      onPointerUp: (_) => onPressUp?.call(),
+      onPointerCancel: (_) => onPressUp?.call(),
       child: Container(
         width: 64,
         height: 64,
