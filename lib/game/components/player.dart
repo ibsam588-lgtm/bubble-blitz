@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../../models/player_data.dart';
 import '../../utils/constants.dart';
 import '../bubble_blitz_game.dart';
-import 'platform.dart';
 
 class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
   double vx = 0;

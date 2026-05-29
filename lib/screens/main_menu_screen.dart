@@ -252,7 +252,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
             width: selected ? 20 : 13,
             height: selected ? 20 : 13,
             decoration: BoxDecoration(
-              color: unlocked ? _charColor(ch) : Colors.white20,
+              color: unlocked ? _charColor(ch) : Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
               border: selected
                   ? Border.all(color: Colors.white, width: 2.5)
@@ -624,7 +624,7 @@ class _BubPreviewPainter extends CustomPainter {
 
     // Belly
     canvas.drawOval(
-      const Rect.fromCenter(center: Offset(21, 26), width: 20, height: 16),
+      Rect.fromCenter(center: const Offset(21, 26), width: 20, height: 16),
       Paint()..color = _bellyColor,
     );
 
@@ -638,11 +638,11 @@ class _BubPreviewPainter extends CustomPainter {
 
     // ── Front arm nub ──
     canvas.drawOval(
-      const Rect.fromCenter(center: Offset(36, 24), width: 11, height: 9),
+      Rect.fromCenter(center: const Offset(36, 24), width: 11, height: 9),
       Paint()..color = _bodyColor,
     );
     canvas.drawOval(
-      const Rect.fromCenter(center: Offset(36, 24), width: 11, height: 9),
+      Rect.fromCenter(center: const Offset(36, 24), width: 11, height: 9),
       Paint()
         ..color = _outlineColor
         ..style = PaintingStyle.stroke
