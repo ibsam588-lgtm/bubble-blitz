@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/player_data.dart';
 import '../../services/save_service.dart';
 
 class GameManager extends ChangeNotifier {
