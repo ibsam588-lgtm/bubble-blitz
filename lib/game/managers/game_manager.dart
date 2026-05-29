@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
+import '../../models/player_data.dart';
 import '../../services/save_service.dart';
 
 class GameManager extends ChangeNotifier {
@@ -75,6 +77,19 @@ class GameManager extends ChangeNotifier {
     bigBubbleActive = true;
     bigBubbleTimer = 10.0;
     notifyListeners();
+  }
+
+  /// High score from persistent storage.
+  int get hiScore => SaveService.instance.data.highScore;
+
+  /// Body color of the currently selected player character.
+  Color get playerCharColor {
+    final id = SaveService.instance.data.selectedChar;
+    switch (id) {
+      case 'phoenix': return const Color(0xFF00B8D9);
+      case 'shadow':  return const Color(0xFFE91E8C);
+      default:        return const Color(0xFF2EC05C); // dragon
+    }
   }
 
   void tickPowerups(double dt) {

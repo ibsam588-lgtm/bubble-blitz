@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 
 import '../world/level_data.dart';
 
+/// BB2-style stone + grass platform used for every world.
 class GamePlatform extends PositionComponent {
   final PlatformSpec spec;
   final Color color;
   final int world;
   double _t = 0;
   late final double _startX;
-  late final List<Offset> _stonePatches;
+  late final List<_Stone> _stones;
 
   GamePlatform({required this.spec, required this.color, required this.world})
       : super(
@@ -19,16 +20,23 @@ class GamePlatform extends PositionComponent {
           size: Vector2(spec.width, spec.height),
         ) {
     _startX = spec.x;
-    _stonePatches = _buildStonePatches();
+    _stones = _buildStones();
   }
 
-  List<Offset> _buildStonePatches() {
+  /// Pre-compute random stone-block subdivision for visual variety.
+  List<_Stone> _buildStones() {
     final rand = math.Random((spec.x * 7 + spec.y * 13).toInt().abs());
-    final count = (spec.width / 20).floor() + 1;
-    return List.generate(count, (_) => Offset(
-      rand.nextDouble() * (spec.width - 10) + 5,
-      rand.nextDouble() * (spec.height - 4) + 2,
-    ));
+    final stones = <_Stone>[];
+    double x = 0;
+    const minW = 18.0;
+    const maxW = 32.0;
+    while (x < spec.width) {
+      final w = (minW + rand.nextDouble() * (maxW - minW))
+          .clamp(minW, spec.width - x);
+      stones.add(_Stone(x: x, w: w, shade: rand.nextDouble()));
+      x += w;
+    }
+    return stones;
   }
 
   @override
@@ -42,162 +50,132 @@ class GamePlatform extends PositionComponent {
 
   @override
   void render(Canvas canvas) {
-    switch (world) {
-      case 1: _renderBamboo(canvas); break;
-      case 2: _renderWood(canvas);   break;
-      case 3: _renderStone(canvas);  break;
-      default: _renderDefault(canvas);
-    }
+    _renderBB2Stone(canvas);
   }
 
-  // ── World 1: Bamboo ───────────────────────────────────────────────────────
-
-  void _renderBamboo(Canvas canvas) {
+  void _renderBB2Stone(Canvas canvas) {
     final w = size.x;
     final h = size.y;
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, w, h), const Radius.circular(6));
 
-    // Bamboo stalk body
-    canvas.drawRRect(rrect, Paint()..color = const Color(0xFF558B2F));
-
-    // Inner lighter stripe (depth)
+    // ── Outer dark shadow / depth ──────────────────────────────────────────
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(w * 0.25, 2, w * 0.5, h - 4), const Radius.circular(3)),
-      Paint()..color = const Color(0xFF689F38).withValues(alpha: 0.5),
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(2, 3, w, h), const Radius.circular(4)),
+      Paint()..color = const Color(0x55000000),
     );
 
-    // Node joint rings every 16 px
-    final nodePaint = Paint()
-      ..color = const Color(0xFF33691E)
-      ..strokeWidth = 2.5
-      ..style = PaintingStyle.stroke;
-    for (double nx = 16; nx < w; nx += 16) {
-      canvas.drawLine(Offset(nx, 0), Offset(nx, h), nodePaint);
+    // ── Draw individual stone blocks ───────────────────────────────────────
+    for (final s in _stones) {
+      _renderStoneBlock(canvas, s.x, 0, s.w, h, s.shade);
     }
 
-    // Bright grass-green cap on top surface
+    // ── Lush green grass cap on top ────────────────────────────────────────
+    // Base grass fill
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, w, 5), const Radius.circular(4)),
-      Paint()..color = const Color(0xFF76FF03),
+      RRect.fromRectAndCorners(
+        Rect.fromLTWH(0, 0, w, 8),
+        topLeft: const Radius.circular(4),
+        topRight: const Radius.circular(4),
+      ),
+      Paint()..color = const Color(0xFF3EC64E),
     );
-
-    // Moving platform shimmer
-    if (spec.moving) {
-      final s = ((math.sin(_t * 4) + 1) / 2) * 0.18;
-      canvas.drawRRect(rrect, Paint()..color = Colors.white.withValues(alpha: s));
-    }
-  }
-
-  // ── World 2: Wood planks ──────────────────────────────────────────────────
-
-  void _renderWood(Canvas canvas) {
-    final w = size.x;
-    final h = size.y;
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, w, h), const Radius.circular(6));
-
-    // Wood base
-    canvas.drawRRect(rrect, Paint()..color = const Color(0xFF6D4C41));
-
-    // Wood grain lines
-    final grainPaint = Paint()
-      ..color = const Color(0xFF4E342E)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-    for (double gy = 5; gy < h - 1; gy += 4) {
-      canvas.drawLine(Offset(3, gy), Offset(w - 3, gy), grainPaint);
-    }
-
-    // Mossy green top edge
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, w, 5), const Radius.circular(4)),
-      Paint()..color = const Color(0xFF4CAF50),
-    );
-    // Small moss bumps
-    final bumpPaint = Paint()..color = const Color(0xFF388E3C);
-    for (double bx = 8; bx < w - 4; bx += 13) {
-      canvas.drawOval(Rect.fromCenter(center: Offset(bx, 2), width: 9, height: 5), bumpPaint);
-    }
-
-    // Dark outline
-    canvas.drawRRect(
-      rrect,
+    // Bright highlight stripe at very top
+    canvas.drawLine(
+      const Offset(3, 1.5),
+      Offset(w - 3, 1.5),
       Paint()
-        ..color = const Color(0xFF3E2723)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+        ..color = const Color(0xFF7EFF8E)
+        ..strokeWidth = 2.0,
     );
-
-    if (spec.moving) {
-      final s = ((math.sin(_t * 4) + 1) / 2) * 0.18;
-      canvas.drawRRect(rrect, Paint()..color = Colors.white.withValues(alpha: s));
-    }
-  }
-
-  // ── World 3: Stone / rock slab ────────────────────────────────────────────
-
-  void _renderStone(Canvas canvas) {
-    final w = size.x;
-    final h = size.y;
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, w, h), const Radius.circular(6));
-
-    // Stone base
-    canvas.drawRRect(rrect, Paint()..color = const Color(0xFF455A64));
-
-    // Lighter stone patches for texture
-    for (final p in _stonePatches) {
+    // Grass bumps
+    final bumpPaint = Paint()..color = const Color(0xFF2DA040);
+    for (double bx = 5; bx < w - 2; bx += 10) {
       canvas.drawOval(
-        Rect.fromCenter(center: p, width: 11, height: 5),
-        Paint()..color = const Color(0xFF546E7A).withValues(alpha: 0.65),
+        Rect.fromCenter(center: Offset(bx, 0), width: 8, height: 5),
+        bumpPaint,
       );
     }
 
-    // Crack line
-    if (w > 36) {
-      final crackX = w * 0.42;
-      final crackPaint = Paint()
-        ..color = const Color(0xFF263238)
-        ..strokeWidth = 1.2
-        ..style = PaintingStyle.stroke;
-      canvas.drawLine(Offset(crackX, 2), Offset(crackX + 7, h - 2), crackPaint);
+    // ── Thick dark outline ─────────────────────────────────────────────────
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(0, 0, w, h), const Radius.circular(4)),
+      Paint()
+        ..color = const Color(0xFF172830)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.2,
+    );
+
+    // ── Moving platform shimmer pulse ──────────────────────────────────────
+    if (spec.moving) {
+      final alpha = ((math.sin(_t * 4) + 1) / 2) * 0.22;
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+            Rect.fromLTWH(0, 0, w, h), const Radius.circular(4)),
+        Paint()..color = const Color(0xFF90FF9E).withValues(alpha: alpha),
+      );
     }
+  }
 
-    // Lava glow gradient on bottom edge
-    final glowShader = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [Colors.transparent, const Color(0xFFFF6F00).withValues(alpha: 0.55)],
-    ).createShader(Rect.fromLTWH(0, h - 7, w, 7));
-    canvas.drawRect(Rect.fromLTWH(0, h - 7, w, 7), Paint()..shader = glowShader);
+  void _renderStoneBlock(
+      Canvas canvas, double bx, double by, double bw, double bh, double shade) {
+    final rrect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(bx, by, bw, bh), const Radius.circular(3));
 
-    // Dark outline
+    // Stone base — slight shade variation per block
+    final baseGray = (0x5C + (shade * 14).toInt()).clamp(0, 255);
+    final blueShift = (0x6A + (shade * 12).toInt()).clamp(0, 255);
     canvas.drawRRect(
       rrect,
       Paint()
-        ..color = const Color(0xFF1C313A)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
+        ..color = Color.fromARGB(255, baseGray, baseGray + 8, blueShift),
     );
 
-    if (spec.moving) {
-      final s = ((math.sin(_t * 4) + 1) / 2) * 0.14;
-      canvas.drawRRect(rrect, Paint()..color = const Color(0xFFFF6F00).withValues(alpha: s));
+    // Inner lighter top-left bevel (gives 3D depth)
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+          Rect.fromLTWH(bx + 2, by + 8, bw - 4, 3), const Radius.circular(1)),
+      Paint()..color = Colors.white.withValues(alpha: 0.14),
+    );
+
+    // Diamond scale texture lines
+    final texPaint = Paint()
+      ..color = const Color(0xFF3A5060).withValues(alpha: 0.55)
+      ..strokeWidth = 0.8
+      ..style = PaintingStyle.stroke;
+    const step = 10.0;
+    for (double ty = 8; ty < bh - 2; ty += step * 0.65) {
+      for (double tx = bx; tx < bx + bw - step; tx += step) {
+        canvas.drawPath(
+          Path()
+            ..moveTo(tx + step / 2, ty)
+            ..lineTo(tx + step, ty + step * 0.32)
+            ..lineTo(tx + step / 2, ty + step * 0.65)
+            ..lineTo(tx, ty + step * 0.32)
+            ..close(),
+          texPaint,
+        );
+      }
+    }
+
+    // Vertical mortar joint between blocks
+    if (bx > 0) {
+      canvas.drawLine(
+        Offset(bx, by + 8),
+        Offset(bx, by + bh),
+        Paint()
+          ..color = const Color(0xFF1A2C38)
+          ..strokeWidth = 1.2,
+      );
     }
   }
 
-  // ── Fallback ──────────────────────────────────────────────────────────────
-
-  void _renderDefault(Canvas canvas) {
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.x, size.y), const Radius.circular(8));
-    canvas.drawRRect(rrect, Paint()..color = color);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(2, 2, size.x - 4, 4), const Radius.circular(4)),
-      Paint()..color = Colors.white.withValues(alpha: 0.25),
-    );
-  }
-
   Rect get rect => Rect.fromLTWH(position.x, position.y, size.x, size.y);
+}
+
+class _Stone {
+  final double x;
+  final double w;
+  final double shade;
+  const _Stone({required this.x, required this.w, required this.shade});
 }

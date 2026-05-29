@@ -276,299 +276,344 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
 
   @override
   void render(Canvas canvas) {
-    switch (currentSpec.world) {
-      case 1: _renderJungleBg(canvas); break;
-      case 2: _renderForestBg(canvas); break;
-      case 3: _renderVolcanoBg(canvas); break;
-      default: _renderDefaultBg(canvas);
-    }
+    _renderCaveBg(canvas); // All worlds: dark cave dungeon style
     super.render(canvas);
+    _renderDiamondBorderFrame(canvas); // Diamond-chain border over everything
   }
 
-  void _renderJungleBg(Canvas canvas) {
+  /// Dark cave/dungeon background — BB2 authentic style.
+  /// Stone walls on left/right, dark gradient sky, atmospheric drips/particles.
+  void _renderCaveBg(Canvas canvas) {
     final w = worldSize.x;
     final h = worldSize.y;
     final rect = Rect.fromLTWH(0, 0, w, h);
 
-    // Sky gradient
+    // ── Background gradient (deep cave dark) ──────────────────────────────
+    final bgColors = _caveBgColors();
     canvas.drawRect(
       rect,
       Paint()
-        ..shader = const LinearGradient(
+        ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF87CEEB), Color(0xFFB2DFDB), Color(0xFF81C784)],
-          stops: [0.0, 0.5, 1.0],
+          colors: bgColors,
+          stops: const [0.0, 0.45, 1.0],
         ).createShader(rect),
     );
 
-    // Distant rolling hills — 3 layers
-    _drawHills(canvas, w, h, 0.55, const Color(0xFF66BB6A));
-    _drawHills(canvas, w, h, 0.68, const Color(0xFF4CAF50));
-    _drawHills(canvas, w, h, 0.80, const Color(0xFF388E3C));
+    // ── Stone wall tiles — left side ──────────────────────────────────────
+    _drawStoneWall(canvas, 0, 0, 28, h);
 
-    // Floor tile strip
-    final floorY = h - 40.0;
-    canvas.drawRect(
-      Rect.fromLTWH(0, floorY, w, 40),
-      Paint()..color = const Color(0xFF2E7D32),
-    );
-    // Grass tufts
-    for (double fx = 4; fx < w; fx += 18) {
-      canvas.drawOval(
-        Rect.fromCenter(center: Offset(fx, floorY + 2), width: 14, height: 8),
-        Paint()..color = const Color(0xFF76FF03),
-      );
-    }
+    // ── Stone wall tiles — right side ─────────────────────────────────────
+    _drawStoneWall(canvas, w - 28, 0, 28, h);
 
-    // Bamboo stalks on edges
-    _drawBambooStalk(canvas, 12, 0, h - 40);
-    _drawBambooStalk(canvas, 38, 0, h - 40);
-    _drawBambooStalk(canvas, w - 18, 0, h - 40);
-    _drawBambooStalk(canvas, w - 44, 0, h - 40);
+    // ── Stone ceiling tiles ───────────────────────────────────────────────
+    _drawCeilingStones(canvas, w, 22);
 
-    // Small flowers scattered
-    final rand = math.Random(42);
+    // ── Stalactites hanging from ceiling ─────────────────────────────────
+    final stalRand = math.Random(42);
     for (int i = 0; i < 10; i++) {
-      final fx = rand.nextDouble() * w;
-      final fy = floorY - rand.nextDouble() * 20;
-      _drawFlower(canvas, fx, fy);
+      final sx = 32 + stalRand.nextDouble() * (w - 64);
+      final sLen = 14 + stalRand.nextDouble() * 28;
+      _drawStalactite(canvas, sx, 22, sLen);
+    }
+
+    // ── World-specific atmospheric effects ───────────────────────────────
+    switch (currentSpec.world) {
+      case 1: _drawCaveWaterfall(canvas, w, h); break;
+      case 2: _drawCaveFireflies(canvas, w, h); break;
+      case 3: _drawCaveLavaGlow(canvas, w, h); break;
+    }
+
+    // ── Dripping water from ceiling (all worlds) ─────────────────────────
+    _drawCaveDrips(canvas, w, h);
+
+    // ── Floor stone strip ────────────────────────────────────────────────
+    _drawStoneWall(canvas, 0, h - 24, w, 24);
+  }
+
+  List<Color> _caveBgColors() {
+    switch (currentSpec.world) {
+      case 1: return const [Color(0xFF0A1A28), Color(0xFF0D2230), Color(0xFF0A2A18)];
+      case 2: return const [Color(0xFF0D0A1A), Color(0xFF1A0D2A), Color(0xFF0A0D20)];
+      case 3: return const [Color(0xFF1A0800), Color(0xFF2A0D00), Color(0xFF1A0A00)];
+      default: return const [Color(0xFF0A1020), Color(0xFF0D1830), Color(0xFF0A1020)];
     }
   }
 
-  void _drawHills(Canvas canvas, double w, double h, double yFrac, Color color) {
-    final baseY = h * yFrac;
-    final path = Path()..moveTo(0, h);
-    final steps = 8;
-    for (int i = 0; i <= steps; i++) {
-      final x = w * i / steps;
-      final y = baseY + math.sin(i * 0.8 + 1.0) * 40;
-      path.lineTo(x, y);
-    }
-    path.lineTo(w, h);
-    path.close();
-    canvas.drawPath(path, Paint()..color = color);
-  }
+  void _drawStoneWall(Canvas canvas, double x, double y, double w, double h) {
+    const tileW = 28.0;
+    const tileH = 22.0;
+    for (double ty = y; ty < y + h; ty += tileH) {
+      final row = ((ty - y) / tileH).floor();
+      final xOff = (row % 2 == 0) ? 0.0 : tileW / 2;
+      for (double tx = x - xOff; tx < x + w; tx += tileW) {
+        if (tx + tileW < x || tx > x + w) continue;
+        // Clip to wall area
+        final bx = tx.clamp(x, x + w - 1);
+        final bw = (tx + tileW).clamp(x, x + w) - bx;
+        if (bw <= 0) continue;
 
-  void _drawBambooStalk(Canvas canvas, double x, double yTop, double yBot) {
-    final paint = Paint()..color = const Color(0xFF558B2F);
-    canvas.drawRect(Rect.fromLTWH(x - 5, yTop, 10, yBot - yTop), paint);
-    // Nodes
-    final nodePaint = Paint()..color = const Color(0xFF33691E);
-    for (double y = yTop + 16; y < yBot; y += 20) {
-      canvas.drawRect(Rect.fromLTWH(x - 6, y, 12, 3), nodePaint);
-      // Leaf
-      final leaf = Path()
-        ..moveTo(x + 5, y)
-        ..quadraticBezierTo(x + 20, y - 8, x + 16, y + 4)
-        ..quadraticBezierTo(x + 8, y + 6, x + 5, y)
-        ..close();
-      canvas.drawPath(leaf, Paint()..color = const Color(0xFF76FF03).withValues(alpha: 0.7));
-    }
-  }
-
-  void _drawFlower(Canvas canvas, double x, double y) {
-    const petals = [Colors.white, Color(0xFFFFF176), Color(0xFFFFCDD2)];
-    final color = petals[((x + y).toInt()).abs() % petals.length];
-    for (int i = 0; i < 5; i++) {
-      final a = i * 2 * math.pi / 5;
-      canvas.drawCircle(
-        Offset(x + math.cos(a) * 3, y + math.sin(a) * 3), 2.5,
-        Paint()..color = color,
-      );
-    }
-    canvas.drawCircle(Offset(x, y), 2, Paint()..color = const Color(0xFFFFEB3B));
-  }
-
-  void _renderForestBg(Canvas canvas) {
-    final w = worldSize.x;
-    final h = worldSize.y;
-    final rect = Rect.fromLTWH(0, 0, w, h);
-
-    // Dark sky
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0A0E1A), Color(0xFF0D1B2A), Color(0xFF1A2E1A)],
-          stops: [0.0, 0.5, 1.0],
-        ).createShader(rect),
-    );
-
-    // Tree silhouette layers (back to front)
-    _drawTreeLayer(canvas, w, h, 0.48, const Color(0xFF0D1A0D), 8);
-    _drawTreeLayer(canvas, w, h, 0.62, const Color(0xFF142814), 6);
-    _drawTreeLayer(canvas, w, h, 0.76, const Color(0xFF1B3A1B), 5);
-
-    // Vines hanging from top
-    final rand = math.Random(77);
-    for (int i = 0; i < 8; i++) {
-      final vx = rand.nextDouble() * w;
-      final vineLen = 80 + rand.nextDouble() * 120;
-      final sway = math.sin(_bgT * 0.6 + i) * 6;
-      _drawVine(canvas, vx + sway, vineLen);
-    }
-
-    // Firefly dots
-    final ffRand = math.Random(55);
-    for (int i = 0; i < 20; i++) {
-      final fx = ffRand.nextDouble() * w;
-      final fy = ffRand.nextDouble() * (h * 0.75);
-      final blink = (math.sin(_bgT * 2.5 + i * 1.3) + 1) / 2;
-      canvas.drawCircle(
-        Offset(fx, fy), 2.5,
-        Paint()..color = const Color(0xFFFFEB3B).withValues(alpha: blink * 0.8),
-      );
-    }
-
-    // Dark floor
-    canvas.drawRect(
-      Rect.fromLTWH(0, h - 40, w, 40),
-      Paint()..color = const Color(0xFF0D1A0D),
-    );
-  }
-
-  void _drawTreeLayer(Canvas canvas, double w, double h, double yFrac, Color color, int count) {
-    final rand = math.Random((yFrac * 100).toInt());
-    for (int i = 0; i < count; i++) {
-      final tx = rand.nextDouble() * w;
-      final treeH = 120 + rand.nextDouble() * 80;
-      final treeW = 50 + rand.nextDouble() * 40;
-      final ty = h * yFrac - treeH;
-
-      // Trunk
-      canvas.drawRect(
-        Rect.fromLTWH(tx - 6, ty + treeH * 0.6, 12, treeH * 0.4),
-        Paint()..color = color,
-      );
-      // Canopy layers
-      for (int layer = 0; layer < 3; layer++) {
-        final ly = ty + layer * treeH * 0.2;
-        final lw = treeW * (1.0 - layer * 0.25);
-        final path = Path()
-          ..moveTo(tx, ly)
-          ..lineTo(tx - lw / 2, ly + treeH * 0.35)
-          ..lineTo(tx + lw / 2, ly + treeH * 0.35)
-          ..close();
-        canvas.drawPath(path, Paint()..color = color);
+        // Stone block base
+        final shade = 0.50 + ((tx * 7 + ty * 13).toInt().abs() % 20) / 100.0;
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(bx + 1, ty + 1, bw - 2, tileH - 2),
+              const Radius.circular(2)),
+          Paint()
+            ..color = Color.fromARGB(255, (80 * shade).toInt(),
+                (90 * shade).toInt(), (100 * shade).toInt()),
+        );
+        // Top highlight
+        canvas.drawLine(
+          Offset(bx + 2, ty + 2),
+          Offset(bx + bw - 2, ty + 2),
+          Paint()
+            ..color = Colors.white.withValues(alpha: 0.10)
+            ..strokeWidth = 1.0,
+        );
+        // Mortar joint outline
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(bx, ty, bw, tileH), const Radius.circular(2)),
+          Paint()
+            ..color = const Color(0xFF060E14)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.2,
+        );
       }
     }
   }
 
-  void _drawVine(Canvas canvas, double x, double length) {
-    final paint = Paint()
-      ..color = const Color(0xFF1B5E20).withValues(alpha: 0.7)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-    final path = Path()..moveTo(x, 0);
-    for (double y = 10; y < length; y += 10) {
-      path.lineTo(x + math.sin(y * 0.3) * 5, y);
-    }
-    canvas.drawPath(path, paint);
-    // Leaf at end
-    final leaf = Path()
-      ..moveTo(x, length)
-      ..quadraticBezierTo(x + 12, length - 6, x + 8, length + 6)
-      ..quadraticBezierTo(x + 2, length + 8, x, length)
-      ..close();
-    canvas.drawPath(leaf, Paint()..color = const Color(0xFF2E7D32).withValues(alpha: 0.6));
+  void _drawCeilingStones(Canvas canvas, double w, double h) {
+    // Solid dark ceiling bar
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, w, h),
+      Paint()..color = const Color(0xFF060E14),
+    );
+    // Stone texture on bottom edge
+    _drawStoneWall(canvas, 0, h - 8, w, 8);
   }
 
-  void _renderVolcanoBg(Canvas canvas) {
-    final w = worldSize.x;
-    final h = worldSize.y;
-    final rect = Rect.fromLTWH(0, 0, w, h);
-
-    // Dark red sky
-    canvas.drawRect(
-      rect,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFF1A0000),
-            const Color(0xFF4A0000),
-            const Color(0xFFBF360C).withValues(alpha: 0.8),
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ).createShader(rect),
+  void _drawStalactite(Canvas canvas, double x, double ceilY, double len) {
+    // Rock-colored triangle icicle
+    final path = Path()
+      ..moveTo(x - 5, ceilY)
+      ..lineTo(x + 5, ceilY)
+      ..lineTo(x, ceilY + len)
+      ..close();
+    canvas.drawPath(
+      path,
+      Paint()..color = const Color(0xFF2A3A44),
     );
-
-    // Jagged rock silhouettes on sides
-    _drawRockSilhouette(canvas, 0, h, true);
-    _drawRockSilhouette(canvas, w, h, false);
-
-    // Lava pool glow at bottom (pulsing)
-    final pulse = (math.sin(_bgT * 2.2) + 1) / 2;
-    final lavaGlow = Paint()
-      ..shader = RadialGradient(
-        center: Alignment.bottomCenter,
-        radius: 1.0,
-        colors: [
-          const Color(0xFFFF6F00).withValues(alpha: 0.4 + pulse * 0.25),
-          Colors.transparent,
-        ],
-      ).createShader(Rect.fromLTWH(0, h - 200, w, 200));
-    canvas.drawRect(Rect.fromLTWH(0, h - 200, w, 200), lavaGlow);
-
-    // Lava floor
-    canvas.drawRect(
-      Rect.fromLTWH(0, h - 40, w, 40),
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [const Color(0xFFBF360C), const Color(0xFFFF6F00)],
-        ).createShader(Rect.fromLTWH(0, h - 40, w, 40)),
+    // Lighter highlight
+    canvas.drawPath(
+      Path()
+        ..moveTo(x - 3, ceilY)
+        ..lineTo(x - 1, ceilY)
+        ..lineTo(x, ceilY + len * 0.6)
+        ..lineTo(x - 2, ceilY + len * 0.5),
+      Paint()..color = Colors.white.withValues(alpha: 0.12),
     );
+    // Water drop tip
+    canvas.drawCircle(
+      Offset(x, ceilY + len),
+      2.2,
+      Paint()..color = const Color(0xFF90CAF9).withValues(alpha: 0.6),
+    );
+  }
 
-    // Ember particles floating upward
-    final eRand = math.Random(99);
-    for (int i = 0; i < 18; i++) {
-      final baseX = eRand.nextDouble() * w;
-      final speed = 30 + eRand.nextDouble() * 60;
-      final ey = (h - (_bgT * speed * 0.5 + i * 44) % h).clamp(0.0, h);
-      final glow = (math.sin(_bgT * 3 + i) + 1) / 2;
-      canvas.drawCircle(
-        Offset(baseX + math.sin(_bgT * 1.5 + i) * 10, ey),
-        1.5 + glow * 1.5,
-        Paint()..color = const Color(0xFFFF9800).withValues(alpha: 0.5 + glow * 0.4),
+  void _drawCaveDrips(Canvas canvas, double w, double h) {
+    final rand = math.Random(31);
+    for (int i = 0; i < 14; i++) {
+      final dx = 32 + rand.nextDouble() * (w - 64);
+      final speed = 60 + rand.nextDouble() * 80;
+      final phase = rand.nextDouble() * math.pi * 2;
+      // Drip travels from ceiling down
+      final dy = ((_bgT * speed + phase * 20) % (h - 40)) + 22;
+      final alpha = 1.0 - (dy / h);
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(dx, dy), width: 3, height: 6),
+        Paint()
+          ..color =
+              const Color(0xFF90CAF9).withValues(alpha: alpha * 0.45),
       );
     }
   }
 
-  void _drawRockSilhouette(Canvas canvas, double xBase, double h, bool isLeft) {
-    final path = Path();
-    final rand = math.Random(isLeft ? 11 : 22);
-    final xSign = isLeft ? 1.0 : -1.0;
-    path.moveTo(xBase, h);
-    path.lineTo(xBase, h * 0.3);
-    double y = h * 0.3;
-    while (y < h) {
-      final jag = rand.nextDouble() * 60 + 20;
-      final jx = xBase + xSign * (30 + rand.nextDouble() * 50);
-      path.lineTo(jx, y + jag / 2);
-      path.lineTo(xBase, y + jag);
-      y += jag;
+  void _drawCaveWaterfall(Canvas canvas, double w, double h) {
+    // Right-side waterfall in world 1
+    final wfX = w - 40.0;
+    final scroll = (_bgT * 80) % h;
+    final wfPaint = Paint()
+      ..color = const Color(0xFF4FC3F7).withValues(alpha: 0.25)
+      ..strokeWidth = 6;
+    canvas.drawLine(Offset(wfX, 22), Offset(wfX - 4, h - 24), wfPaint);
+    // Ripple shimmer
+    for (double ry = scroll; ry < h; ry += 20) {
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(wfX - 2, ry), width: 10, height: 4),
+        Paint()..color = Colors.white.withValues(alpha: 0.12),
+      );
     }
-    path.close();
-    canvas.drawPath(path, Paint()..color = const Color(0xFF212121));
   }
 
-  void _renderDefaultBg(Canvas canvas) {
-    final rect = Rect.fromLTWH(0, 0, worldSize.x, worldSize.y);
+  void _drawCaveFireflies(Canvas canvas, double w, double h) {
+    final rand = math.Random(88);
+    for (int i = 0; i < 18; i++) {
+      final fx = 32 + rand.nextDouble() * (w - 64);
+      final fy = 40 + rand.nextDouble() * (h * 0.8);
+      final blink = (math.sin(_bgT * 2.2 + i * 1.7) + 1) / 2;
+      canvas.drawCircle(
+        Offset(fx, fy),
+        2.5,
+        Paint()
+          ..color = const Color(0xFFCEFF1A).withValues(alpha: blink * 0.75),
+      );
+    }
+  }
+
+  void _drawCaveLavaGlow(Canvas canvas, double w, double h) {
+    final pulse = (math.sin(_bgT * 2.2) + 1) / 2;
+    // Bottom lava glow
     canvas.drawRect(
-      rect,
+      Rect.fromLTWH(0, h - 80, w, 80),
       Paint()
         ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [currentSpec.bgSecondary, currentSpec.bgPrimary],
-        ).createShader(rect),
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            const Color(0xFFFF6D00).withValues(alpha: 0.35 + pulse * 0.2),
+            Colors.transparent,
+          ],
+        ).createShader(Rect.fromLTWH(0, h - 80, w, 80)),
     );
+    // Floating embers
+    final eRand = math.Random(77);
+    for (int i = 0; i < 14; i++) {
+      final ex = 32 + eRand.nextDouble() * (w - 64);
+      final speed = 40 + eRand.nextDouble() * 60;
+      final ey = (h - (_bgT * speed * 0.5 + i * 50) % h).clamp(0.0, h);
+      final g = (math.sin(_bgT * 3 + i) + 1) / 2;
+      canvas.drawCircle(
+        Offset(ex + math.sin(_bgT * 1.5 + i) * 8, ey),
+        1.5 + g * 1.5,
+        Paint()
+          ..color = const Color(0xFFFF9800).withValues(alpha: 0.45 + g * 0.4),
+      );
+    }
+  }
+
+  /// Diamond-chain border frame around the play area — classic BB2 style.
+  void _renderDiamondBorderFrame(Canvas canvas) {
+    final w = worldSize.x;
+    final h = worldSize.y;
+
+    // Border color cycling per world
+    final Color chainColor;
+    switch (currentSpec.world) {
+      case 1: chainColor = const Color(0xFF00E676); break;  // green
+      case 2: chainColor = const Color(0xFF7C4DFF); break;  // purple
+      case 3: chainColor = const Color(0xFFFF6D00); break;  // orange
+      default: chainColor = const Color(0xFF00B0FF); break;
+    }
+    final Color chainGlow = chainColor.withValues(alpha: 0.35);
+    final Color chainDark = const Color(0xFF172830);
+
+    // Frame width
+    const fw = 26.0;
+    // Diamond chain spacing
+    const ds = 18.0;
+
+    // Draw a chain of diamonds along each edge
+    void drawChain(List<Offset> centers) {
+      for (int i = 0; i < centers.length; i++) {
+        final c = centers[i];
+        // Link connector to next
+        if (i < centers.length - 1) {
+          canvas.drawLine(c, centers[i + 1],
+              Paint()
+                ..color = chainDark
+                ..strokeWidth = 4);
+          canvas.drawLine(c, centers[i + 1],
+              Paint()
+                ..color = chainColor.withValues(alpha: 0.5)
+                ..strokeWidth = 2);
+        }
+        // Glow halo
+        canvas.drawCircle(c, 7, Paint()..color = chainGlow);
+        // Diamond shape
+        final dp = Path()
+          ..moveTo(c.dx, c.dy - 7)
+          ..lineTo(c.dx + 5, c.dy)
+          ..lineTo(c.dx, c.dy + 7)
+          ..lineTo(c.dx - 5, c.dy)
+          ..close();
+        canvas.drawPath(dp, Paint()..color = chainDark);
+        canvas.drawPath(dp, Paint()..color = chainColor);
+        canvas.drawPath(dp,
+            Paint()
+              ..color = Colors.white.withValues(alpha: 0.5)
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 0.8);
+        // Inner highlight dot
+        canvas.drawCircle(c + const Offset(-1.5, -2), 1.5,
+            Paint()..color = Colors.white.withValues(alpha: 0.7));
+      }
+    }
+
+    // Left chain
+    final leftChain = <Offset>[];
+    for (double y = fw; y <= h - fw; y += ds) {
+      leftChain.add(Offset(fw / 2, y));
+    }
+    drawChain(leftChain);
+
+    // Right chain
+    final rightChain = <Offset>[];
+    for (double y = fw; y <= h - fw; y += ds) {
+      rightChain.add(Offset(w - fw / 2, y));
+    }
+    drawChain(rightChain);
+
+    // Top chain
+    final topChain = <Offset>[];
+    for (double x = fw; x <= w - fw; x += ds) {
+      topChain.add(Offset(x, fw / 2));
+    }
+    drawChain(topChain);
+
+    // Bottom chain
+    final bottomChain = <Offset>[];
+    for (double x = fw; x <= w - fw; x += ds) {
+      bottomChain.add(Offset(x, h - fw / 2));
+    }
+    drawChain(bottomChain);
+
+    // Corner gems (larger diamonds)
+    for (final corner in [
+      Offset(fw / 2, fw / 2),
+      Offset(w - fw / 2, fw / 2),
+      Offset(fw / 2, h - fw / 2),
+      Offset(w - fw / 2, h - fw / 2),
+    ]) {
+      canvas.drawCircle(corner, 10, Paint()..color = chainGlow);
+      final cp = Path()
+        ..moveTo(corner.dx, corner.dy - 10)
+        ..lineTo(corner.dx + 7, corner.dy)
+        ..lineTo(corner.dx, corner.dy + 10)
+        ..lineTo(corner.dx - 7, corner.dy)
+        ..close();
+      canvas.drawPath(cp, Paint()..color = chainDark);
+      canvas.drawPath(cp, Paint()..color = chainColor);
+      canvas.drawPath(
+        cp,
+        Paint()
+          ..color = Colors.white.withValues(alpha: 0.65)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.2,
+      );
+    }
   }
 
   Future<void> restartLevel() async {

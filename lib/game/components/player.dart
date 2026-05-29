@@ -17,37 +17,55 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
   double invincibleTimer = 0;
   CharacterType character = CharacterType.dragon;
 
-  static const double _w = 36;
-  static const double _h = 40;
+  static const double _w = 38;
+  static const double _h = 38;
 
   Player({required Vector2 position, required this.character})
       : super(position: position, size: Vector2(_w, _h), anchor: Anchor.topLeft);
 
+  // ── BB2 Bub / Bob palette ──────────────────────────────────────────────────
+
   Color get _bodyColor {
     switch (character) {
-      case CharacterType.dragon:  return const Color(0xFF4CAF50);
-      case CharacterType.phoenix: return const Color(0xFFFF5722);
-      case CharacterType.shadow:  return const Color(0xFF4527A0);
+      case CharacterType.dragon:  return const Color(0xFF2EC05C); // Bub: emerald green
+      case CharacterType.phoenix: return const Color(0xFF00B8D9); // Bob: cyan-blue
+      case CharacterType.shadow:  return const Color(0xFFE91E8C); // pink-magenta
     }
   }
 
   Color get _bellyColor {
     switch (character) {
-      case CharacterType.dragon:  return const Color(0xFF81C784);
-      case CharacterType.phoenix: return const Color(0xFFFFCC02);
-      case CharacterType.shadow:  return const Color(0xFF9575CD);
+      case CharacterType.dragon:  return const Color(0xFFA8E6C3);
+      case CharacterType.phoenix: return const Color(0xFFB2EBF2);
+      case CharacterType.shadow:  return const Color(0xFFF8BBD9);
     }
   }
 
   Color get _outlineColor {
     switch (character) {
-      case CharacterType.dragon:  return const Color(0xFF1B5E20);
-      case CharacterType.phoenix: return const Color(0xFFBF360C);
-      case CharacterType.shadow:  return const Color(0xFF1A237E);
+      case CharacterType.dragon:  return const Color(0xFF0A4020);
+      case CharacterType.phoenix: return const Color(0xFF00405A);
+      case CharacterType.shadow:  return const Color(0xFF5A0030);
     }
   }
 
-  // ── Physics ──────────────────────────────────────────────────────────────
+  Color get _hornColor {
+    switch (character) {
+      case CharacterType.dragon:  return const Color(0xFF14602E);
+      case CharacterType.phoenix: return const Color(0xFF006080);
+      case CharacterType.shadow:  return const Color(0xFF7B0040);
+    }
+  }
+
+  Color get _irisColor {
+    switch (character) {
+      case CharacterType.dragon:  return const Color(0xFF00D4A0);
+      case CharacterType.phoenix: return const Color(0xFF00D0F0);
+      case CharacterType.shadow:  return const Color(0xFFFF70CC);
+    }
+  }
+
+  // ── Physics ───────────────────────────────────────────────────────────────
 
   void moveLeft()  { vx = -AppConstants.playerSpeed; facingRight = false; }
   void moveRight() { vx =  AppConstants.playerSpeed; facingRight = true;  }
@@ -67,7 +85,8 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
     if (invincible) return;
     invincible = true;
     invincibleTimer = 1.4;
-    add(OpacityEffect.fadeOut(EffectController(duration: 0.15, alternate: true, repeatCount: 4)));
+    add(OpacityEffect.fadeOut(EffectController(
+        duration: 0.15, alternate: true, repeatCount: 4)));
     game.onPlayerHit();
   }
 
@@ -91,7 +110,9 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
     _resolveVertical();
 
     if (position.x < 0) position.x = 0;
-    if (position.x + size.x > game.worldSize.x) position.x = game.worldSize.x - size.x;
+    if (position.x + size.x > game.worldSize.x) {
+      position.x = game.worldSize.x - size.x;
+    }
 
     if (position.y > game.worldSize.y + 40) {
       position = Vector2(60, game.worldSize.y - 120);
@@ -114,8 +135,14 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
     final myRect = Rect.fromLTWH(position.x, position.y, size.x, size.y);
     for (final p in game.platforms) {
       if (myRect.overlaps(p.rect)) {
-        if (vy > 0) { position.y = p.rect.top - size.y; vy = 0; onGround = true; }
-        else if (vy < 0) { position.y = p.rect.bottom; vy = 0; }
+        if (vy > 0) {
+          position.y = p.rect.top - size.y;
+          vy = 0;
+          onGround = true;
+        } else if (vy < 0) {
+          position.y = p.rect.bottom;
+          vy = 0;
+        }
       }
     }
   }
@@ -124,97 +151,123 @@ class Player extends PositionComponent with HasGameReference<BubbleBlitzGame> {
 
   @override
   void render(Canvas canvas) {
-    final cx = size.x / 2; // 18
+    final cx = size.x / 2; // 19
+    final cy = size.y / 2; // 19
 
-    // Wing nub (drawn behind body, on the back side)
-    final wingX = facingRight ? cx - 13.0 : cx + 13.0;
+    const bodyR = 15.0;
+    final bodyCenter = Offset(cx, cy + 1);
+
+    // ── Back arm nub (behind body) ──
+    final backArmX = facingRight ? cx - 14.0 : cx + 14.0;
     canvas.drawOval(
-      Rect.fromCenter(center: Offset(wingX, 17), width: 17, height: 12),
+      Rect.fromCenter(center: Offset(backArmX, cy + 5), width: 9, height: 7),
       Paint()..color = _bodyColor,
     );
-    canvas.drawOval(
-      Rect.fromCenter(center: Offset(wingX, 17), width: 17, height: 12),
+
+    // ── Main round body ──
+    canvas.drawCircle(bodyCenter, bodyR, Paint()..color = _bodyColor);
+    canvas.drawCircle(
+      bodyCenter,
+      bodyR,
       Paint()
         ..color = _outlineColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.4,
+        ..strokeWidth = 2.2,
     );
 
-    // Main chubby oval body
+    // ── Oval belly ──
     canvas.drawOval(
-      Rect.fromLTWH(2, 5, 32, 32),
-      Paint()..color = _bodyColor,
-    );
-    canvas.drawOval(
-      Rect.fromLTWH(2, 5, 32, 32),
-      Paint()
-        ..color = _outlineColor
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.8,
-    );
-
-    // Lighter belly
-    canvas.drawOval(
-      Rect.fromCenter(center: Offset(cx, 25), width: 19, height: 21),
+      Rect.fromCenter(center: Offset(cx, cy + 5), width: 16, height: 13),
       Paint()..color = _bellyColor,
     );
 
-    // Horn on top of head (front side)
-    final hornCx = facingRight ? cx + 5.0 : cx - 5.0;
+    // ── Small curved horn (front-top) ──
+    final hornPivotX = facingRight ? cx + 4.0 : cx - 4.0;
     final hornPath = Path()
-      ..moveTo(hornCx - 4, 8)
-      ..lineTo(hornCx, 0)
-      ..lineTo(hornCx + 4, 8)
+      ..moveTo(hornPivotX - 3, cy - 11)
+      ..quadraticBezierTo(
+          hornPivotX + 6, cy - 22, hornPivotX + 8, cy - 13)
+      ..lineTo(hornPivotX + 2, cy - 11)
       ..close();
-    canvas.drawPath(hornPath, Paint()..color = _outlineColor);
+    canvas.drawPath(hornPath, Paint()..color = _hornColor);
     canvas.drawPath(
       hornPath,
       Paint()
-        ..color = _bellyColor
+        ..color = _outlineColor
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1,
+        ..strokeWidth = 0.8,
     );
 
-    // Large white eye sclera
-    final eyeX = facingRight ? cx + 7.0 : cx - 7.0;
-    canvas.drawCircle(Offset(eyeX, 15), 6.5, Paint()..color = Colors.white);
-    // Eye outline
+    // ── HUGE round eye — BB2's signature feature (~40% of face) ──
+    final eyeX = facingRight ? cx + 4.5 : cx - 4.5;
+    const eyeY = -1.0; // offset from cy
+    const eyeR = 9.0; // large!
+    final eyeCenter = Offset(eyeX, cy + eyeY);
+
+    // White sclera
+    canvas.drawCircle(eyeCenter, eyeR, Paint()..color = Colors.white);
+    // Eye border
     canvas.drawCircle(
-      Offset(eyeX, 15),
-      6.5,
+      eyeCenter,
+      eyeR,
+      Paint()
+        ..color = _outlineColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6,
+    );
+    // Colored iris
+    final irisOff = facingRight ? const Offset(1.5, 1.0) : const Offset(-1.5, 1.0);
+    canvas.drawCircle(
+      eyeCenter + irisOff, 5.8, Paint()..color = _irisColor);
+    // Black pupil
+    final pupilOff =
+        facingRight ? const Offset(2.0, 1.5) : const Offset(-2.0, 1.5);
+    canvas.drawCircle(
+      eyeCenter + pupilOff, 3.4, Paint()..color = Colors.black);
+    // Primary shine
+    final shineOff =
+        facingRight ? const Offset(-2.5, -3.5) : const Offset(2.5, -3.5);
+    canvas.drawCircle(
+      eyeCenter + shineOff, 2.2, Paint()..color = Colors.white);
+    // Tiny secondary shine
+    final shine2Off =
+        facingRight ? const Offset(3.0, 3.5) : const Offset(-3.0, 3.5);
+    canvas.drawCircle(
+      eyeCenter + shine2Off, 1.0,
+      Paint()..color = Colors.white.withValues(alpha: 0.7));
+
+    // ── Front arm nub (in front of body) ──
+    final frontArmX = facingRight ? cx + 14.5 : cx - 14.5;
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(frontArmX, cy + 5), width: 10, height: 8),
+      Paint()..color = _bodyColor,
+    );
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(frontArmX, cy + 5), width: 10, height: 8),
       Paint()
         ..color = _outlineColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.2,
     );
-    // Black pupil
-    final pupilX = facingRight ? eyeX + 2.0 : eyeX - 2.0;
-    canvas.drawCircle(Offset(pupilX, 15.5), 3.8, Paint()..color = Colors.black);
-    // Shine dot
-    canvas.drawCircle(Offset(eyeX + (facingRight ? -1.0 : 1.0), 11.5), 1.5,
-        Paint()..color = Colors.white);
 
-    // Stubby legs at bottom
-    final legPaint = Paint()..color = _outlineColor;
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(cx - 14, 35, 12, 5), const Radius.circular(3)),
-      legPaint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(cx + 2, 35, 12, 5), const Radius.circular(3)),
-      legPaint,
-    );
-
-    // Open mouth when shooting
+    // ── Open mouth when shooting ──
     if (shootCooldown > 0.1) {
-      final mouthX = facingRight ? eyeX + 9.0 : eyeX - 9.0;
+      final mouthX = facingRight ? cx + 12.0 : cx - 12.0;
+      final mouthY = cy + 7.0;
+      // Mouth opening (red)
       canvas.drawOval(
-        Rect.fromCenter(center: Offset(mouthX, 21), width: 9, height: 6),
+        Rect.fromCenter(center: Offset(mouthX, mouthY), width: 12, height: 10),
         Paint()..color = const Color(0xFFE53935),
       );
+      // Teeth
       canvas.drawRect(
-        Rect.fromCenter(center: Offset(mouthX, 19.5), width: 7, height: 2),
+        Rect.fromCenter(center: Offset(mouthX, mouthY - 3), width: 10, height: 3),
         Paint()..color = Colors.white,
+      );
+      // Tongue
+      canvas.drawOval(
+        Rect.fromCenter(center: Offset(mouthX, mouthY + 2), width: 7, height: 4),
+        Paint()..color = const Color(0xFFFF7043),
       );
     }
   }
