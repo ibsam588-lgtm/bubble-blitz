@@ -1,6 +1,8 @@
 name: Deploy Bubble Blitz to Play Store
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       track:
