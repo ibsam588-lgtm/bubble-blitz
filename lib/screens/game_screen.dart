@@ -196,7 +196,26 @@ class _GameScreenState extends State<GameScreen> {
         body: SafeArea(
           child: Stack(
             children: [
-              Positioned.fill(child: GameWidget(game: game)),
+              Positioned.fill(
+                child: GameWidget(
+                  game: game,
+                  errorBuilder: (context, error) => Material(
+                    color: const Color(0xFF12121F),
+                    child: SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: SingleChildScrollView(
+                          child: Text(
+                            'Game failed to load:\n\n$error',
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
               // ── D-pad (bottom-left) ───────────────────────────────────
               Positioned(
