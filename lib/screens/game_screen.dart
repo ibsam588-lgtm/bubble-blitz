@@ -1,5 +1,6 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -295,6 +296,12 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  void _haptic() {
+    if (SaveService.instance.vibrationEnabled) {
+      HapticFeedback.lightImpact();
+    }
+  }
+
   Widget _ctrlButton({
     IconData? icon,
     String? label,
@@ -305,7 +312,10 @@ class _GameScreenState extends State<GameScreen> {
   }) {
     return Listener(
       behavior: HitTestBehavior.opaque,
-      onPointerDown: (_) => onPressDown?.call(),
+      onPointerDown: (_) {
+        _haptic();
+        onPressDown?.call();
+      },
       onPointerUp: (_) => onPressUp?.call(),
       onPointerCancel: (_) => onPressUp?.call(),
       child: Container(

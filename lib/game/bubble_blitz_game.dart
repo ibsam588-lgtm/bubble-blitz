@@ -55,10 +55,19 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
   @override
   Future<void> onLoad() async {
     worldSize = Vector2(LevelData.worldW, LevelData.worldH);
-    camera.viewfinder.visibleGameSize = worldSize;
+
+    // Scale the fixed 480x800 design to fit ANY screen (letterboxed & centered).
+    // All gameplay now lives inside `world`; the camera maps world (0,0) to the
+    // top-left of the visible play area so every level fills the screen instead
+    // of rendering tiny in a corner (the old "blank levels" bug).
+    camera.viewport = FixedResolutionViewport(resolution: worldSize);
     camera.viewfinder.anchor = Anchor.topLeft;
+    camera.viewfinder.position = Vector2.zero();
+
+    world.add(_BackgroundLayer());
     await _loadLevel(initialLevel);
-    add(GameHud());
+    world.add(GameHud());
+    world.add(_BorderLayer());
   }
 
   Future<void> _loadLevel(int level) async {
@@ -66,13 +75,13 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
     currentSpec = LevelData.byLevel(level);
     manager.reset(level);
 
-    children.whereType<GamePlatform>().forEach(remove);
-    children.whereType<Enemy>().forEach(remove);
-    children.whereType<Bubble>().forEach(remove);
-    children.whereType<Coin>().forEach(remove);
-    children.whereType<Powerup>().forEach(remove);
-    children.whereType<Player>().forEach(remove);
-    children.whereType<EnemyProjectile>().forEach(remove);
+    world.children.whereType<GamePlatform>().forEach(world.remove);
+    world.children.whereType<Enemy>().forEach(world.remove);
+    world.children.whereType<Bubble>().forEach(world.remove);
+    world.children.whereType<Coin>().forEach(world.remove);
+    world.children.whereType<Powerup>().forEach(world.remove);
+    world.children.whereType<Player>().forEach(world.remove);
+    world.children.whereType<EnemyProjectile>().forEach(world.remove);
     platforms.clear();
     enemies.clear();
     bubbles.clear();
@@ -81,7 +90,7 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
 
     final levelObj = Level(currentSpec);
     for (final c in levelObj.build()) {
-      add(c);
+      world.add(c);
       if (c is GamePlatform) platforms.add(c);
       if (c is Enemy) enemies.add(c);
       if (c is Coin) coins.add(c);
@@ -95,7 +104,7 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
       position: Vector2(currentSpec.playerSpawn.dx, currentSpec.playerSpawn.dy),
       character: char,
     );
-    add(p);
+    world.add(p);
     player = p;
     AudioService.instance.playBgm();
   }
@@ -177,14 +186,14 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
           position: p.position + Vector2(p.size.x / 2, p.size.y / 2),
           vx: dir * 240, vy: i * 60.0, isBig: big,
         );
-        add(b); bubbles.add(b);
+        world.add(b); bubbles.add(b);
       }
     } else {
       final b = Bubble(
         position: p.position + Vector2(p.size.x / 2, p.size.y / 2),
         vx: dir * 280, isBig: big,
       );
-      add(b); bubbles.add(b);
+      world.add(b); bubbles.add(b);
     }
   }
 
@@ -196,29 +205,34 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
       position: from.position + from.size / 2,
       vx: dx.sign * 150, vy: -50,
     );
-    add(proj);
+    world.add(proj);
   }
 
   void spawnMinion(Enemy boss) {
     final slime = SlimeEnemy(
         position: Vector2(boss.position.x + 20, boss.position.y + boss.size.y));
-    add(slime); enemies.add(slime);
+    world.add(slime); enemies.add(slime);
   }
 
   void spawnPopEffect(Vector2 at) {
     AudioService.instance.playSfx(Assets.flameBubblePop);
+    world.add(PopBurst(position: at.clone(), color: const Color(0xFF80E5FF)));
   }
 
   void onEnemyDefeated(Enemy e) {
     manager.addScore(e.scoreValue);
     AudioService.instance.playSfx(Assets.flameBubblePop);
+    final center = e.position + e.size / 2;
+    world.add(PopBurst(position: center, color: const Color(0xFFFFEB3B)));
     final c = Coin(position: e.position.clone());
-    add(c); coins.add(c);
+    world.add(c); coins.add(c);
   }
 
   void onCoinCollected(Coin c) {
     manager.addCoin();
     AudioService.instance.playSfx(Assets.flameCoinCollect);
+    world.add(PopBurst(
+        position: c.position + c.size / 2, color: const Color(0xFFFFD740)));
   }
 
   void onPowerupCollected(Powerup p) {
@@ -235,7 +249,9 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
   @override
   void onTapDown(TapDownInfo info) {
     super.onTapDown(info);
-    final pos = info.eventPosition.global;
+    // Convert the screen tap into world coordinates (the view is scaled &
+    // letterboxed by the camera, so raw global coords no longer match).
+    final pos = camera.globalToLocal(info.eventPosition.global);
     for (final b in bubbles.toList()) {
       if (b.trappedEnemy != null) {
         final d = (b.position - pos).length;
@@ -272,14 +288,7 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
   @override
   Color backgroundColor() => Colors.black;
 
-  // ── Background rendering ─────────────────────────────────────────────────
-
-  @override
-  void render(Canvas canvas) {
-    _renderCaveBg(canvas); // All worlds: dark cave dungeon style
-    super.render(canvas);
-    _renderDiamondBorderFrame(canvas); // Diamond-chain border over everything
-  }
+  // ── Background rendering (drawn by _BackgroundLayer inside the world) ─────
 
   /// Dark cave/dungeon background — BB2 authentic style.
   /// Stone walls on left/right, dark gradient sky, atmospheric drips/particles.
@@ -625,5 +634,67 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
     final next = manager.currentLevel + 1;
     await _loadLevel(next > 15 ? 1 : next);
     resumeEngine();
+  }
+}
+
+/// Renders the animated cave background underneath all gameplay. Lives inside
+/// the camera `world` so it scales with the rest of the level.
+class _BackgroundLayer extends PositionComponent
+    with HasGameReference<BubbleBlitzGame> {
+  _BackgroundLayer() : super(priority: -100);
+
+  @override
+  void render(Canvas canvas) => game._renderCaveBg(canvas);
+}
+
+/// Renders the diamond-chain frame on top of everything (still inside world).
+class _BorderLayer extends PositionComponent
+    with HasGameReference<BubbleBlitzGame> {
+  _BorderLayer() : super(priority: 150);
+
+  @override
+  void render(Canvas canvas) => game._renderDiamondBorderFrame(canvas);
+}
+
+/// Lightweight juicy pop effect: an expanding ring + sparkle dots that fade out.
+/// Used when an enemy is defeated or a coin/bubble is collected.
+class PopBurst extends PositionComponent {
+  PopBurst({required Vector2 position, this.color = const Color(0xFFFFEB3B)})
+      : super(position: position, priority: 50);
+
+  final Color color;
+  double _t = 0;
+  static const double _dur = 0.4;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    _t += dt;
+    if (_t >= _dur) removeFromParent();
+  }
+
+  @override
+  void render(Canvas canvas) {
+    final p = (_t / _dur).clamp(0.0, 1.0);
+    final alpha = 1.0 - p;
+    // Expanding ring
+    canvas.drawCircle(
+      Offset.zero,
+      6 + p * 22,
+      Paint()
+        ..color = color.withValues(alpha: alpha * 0.8)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3,
+    );
+    // Sparkle dots flying outward
+    final dist = p * 22;
+    for (int i = 0; i < 6; i++) {
+      final ang = i * math.pi / 3;
+      canvas.drawCircle(
+        Offset(math.cos(ang) * dist, math.sin(ang) * dist),
+        2.5 * (1 - p) + 0.8,
+        Paint()..color = color.withValues(alpha: alpha),
+      );
+    }
   }
 }
