@@ -31,8 +31,14 @@ class GamePlatform extends PositionComponent {
     const minW = 18.0;
     const maxW = 32.0;
     while (x < spec.width) {
-      final w = (minW + rand.nextDouble() * (maxW - minW))
-          .clamp(minW, spec.width - x);
+      final remaining = spec.width - x;
+      // The final sliver can be narrower than minW. We must NOT clamp(minW,
+      // remaining) in that case because num.clamp throws ArgumentError when
+      // lowerLimit > upperLimit (even in release) — this was crashing level
+      // load and showing a blank/grey screen. Just fill the remaining width.
+      final double w = remaining <= minW
+          ? remaining
+          : (minW + rand.nextDouble() * (maxW - minW)).clamp(minW, remaining);
       stones.add(_Stone(x: x, w: w, shade: rand.nextDouble()));
       x += w;
     }
