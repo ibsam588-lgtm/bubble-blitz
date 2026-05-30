@@ -56,13 +56,12 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
   Future<void> onLoad() async {
     worldSize = Vector2(LevelData.worldW, LevelData.worldH);
 
-    // Scale the fixed 480x800 design to fit ANY screen (letterboxed & centered).
-    // All gameplay now lives inside `world`; the camera maps world (0,0) to the
-    // top-left of the visible play area so every level fills the screen instead
-    // of rendering tiny in a corner (the old "blank levels" bug).
-    camera.viewport = FixedResolutionViewport(resolution: worldSize);
+    // Scale the fixed 480x800 design to fit ANY screen. All gameplay now lives
+    // inside `world`, so the camera zoom actually applies to it (previously the
+    // content was in the game root and rendered tiny in a corner — the old
+    // "blank levels" bug). Anchor top-left so world (0,0) maps to screen (0,0).
+    camera.viewfinder.visibleGameSize = worldSize;
     camera.viewfinder.anchor = Anchor.topLeft;
-    camera.viewfinder.position = Vector2.zero();
 
     world.add(_BackgroundLayer());
     await _loadLevel(initialLevel);
@@ -249,9 +248,10 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
   @override
   void onTapDown(TapDownInfo info) {
     super.onTapDown(info);
-    // Convert the screen tap into world coordinates (the view is scaled &
-    // letterboxed by the camera, so raw global coords no longer match).
-    final pos = camera.globalToLocal(info.eventPosition.global);
+    // The world is uniformly scaled by the camera zoom (anchored top-left), so
+    // divide the screen tap by the zoom to recover world coordinates.
+    final zoom = camera.viewfinder.zoom;
+    final pos = info.eventPosition.global / (zoom == 0 ? 1.0 : zoom);
     for (final b in bubbles.toList()) {
       if (b.trappedEnemy != null) {
         final d = (b.position - pos).length;
