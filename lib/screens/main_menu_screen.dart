@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -60,9 +61,59 @@ class _MainMenuScreenState extends State<MainMenuScreen>
     SaveService.instance.data.selectedChar = ch.id;
   }
 
+  Future<void> _confirmExitApp() async {
+    final leave = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.75),
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF0D1A2A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF00E5FF), width: 2),
+        ),
+        title: Text(
+          'Quit Bubble Blitz?',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.fredoka(color: Colors.white, fontSize: 26),
+        ),
+        content: Text(
+          'Are you sure you want to exit the game?',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.fredoka(color: Colors.white70, fontSize: 16),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            style: TextButton.styleFrom(foregroundColor: Colors.white70),
+            child: Text('STAY', style: GoogleFonts.fredoka(fontSize: 18)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFE53935),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text('EXIT', style: GoogleFonts.fredoka(fontSize: 18)),
+          ),
+        ],
+      ),
+    );
+    if (leave == true) {
+      await SystemNavigator.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (!didPop) await _confirmExitApp();
+      },
+      child: Scaffold(
       body: Stack(
         children: [
           // ── Cave background ─────────────────────────────────────────────
@@ -132,6 +183,7 @@ class _MainMenuScreenState extends State<MainMenuScreen>
             ),
           ),
         ],
+      ),
       ),
     );
   }
