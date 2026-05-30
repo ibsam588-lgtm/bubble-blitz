@@ -63,8 +63,11 @@ class BubbleBlitzGame extends FlameGame with KeyboardEvents, TapDetector {
     camera.viewfinder.visibleGameSize = worldSize;
     camera.viewfinder.anchor = Anchor.topLeft;
 
-    world.add(_BackgroundLayer());
+    // Build the level first so currentSpec is initialized before the
+    // background layer (which reads it) ever renders. Priority keeps the
+    // background behind gameplay and the border/HUD in front.
     await _loadLevel(initialLevel);
+    world.add(_BackgroundLayer());
     world.add(GameHud());
     world.add(_BorderLayer());
   }
